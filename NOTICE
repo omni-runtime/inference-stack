@@ -1,0 +1,11 @@
+inference-stack
+Copyright 2026 The inference-stack contributors.
+
+This project works with vLLM Semantic Router, an Apache-2.0-licensed project
+maintained at https://github.com/vllm-project/semantic-router.
+The router implementation is supplied by the companion semantic-router-multimodal project.
+
+Model weights, inference engines, container base images, and other dependencies
+are separately distributed and retain their own licenses. This repository does
+not distribute model weights. Project and product names identify compatibility;
+they do not imply endorsement by upstream maintainers.

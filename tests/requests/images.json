@@ -1,0 +1,10 @@
+{
+  "model": "auto",
+  "prompt": "A blue square on a white background",
+  "n": 1,
+  "size": "64x64",
+  "response_format": "b64_json",
+  "seed": 7,
+  "num_inference_steps": 4,
+  "guidance_scale": 2.5
+}

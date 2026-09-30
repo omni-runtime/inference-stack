@@ -1,0 +1,17 @@
+.venv/
+.state/
+generated/
+__pycache__/
+*.env
+environments/*/kubeconfig
+secrets/*
+!secrets/credentials.env.example
+
+.DS_Store
+reports/
+*.pem
+*.key
+*.oci.tar
+*.safetensors
+
+contracts/release.local.yaml

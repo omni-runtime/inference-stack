@@ -1,0 +1,106 @@
+{
+  "id": "ddalcu/MiniMax-H3-FL2VA-MLX-Serve-4bit",
+  "sha": "9c9273578ed5c2daf0b9a42eace823a6a49050ba",
+  "siblings": [
+    {
+      "rfilename": ".gitattributes",
+      "size": 1519,
+      "blobId": "a6344aac8c09253b3b630fb776ae94478aa0275b"
+    },
+    {
+      "rfilename": "LICENSE",
+      "size": 17604,
+      "blobId": "c389b45855337ccec8ddeb389f4fe902abcd0b19"
+    },
+    {
+      "rfilename": "MODIFICATIONS.md",
+      "size": 1630,
+      "blobId": "169ee8a0e60bb0ac5de027c794f414edf88dfd94"
+    },
+    {
+      "rfilename": "NOTICE",
+      "size": 552,
+      "blobId": "41d4acd322a0088b3055f6cdb07f289d0cfcac3b"
+    },
+    {
+      "rfilename": "README.md",
+      "size": 3310,
+      "blobId": "7799878b905dd78edfb5f9963c7a5ea23de6bfca"
+    },
+    {
+      "rfilename": "audio_vae.safetensors",
+      "size": 605254808,
+      "blobId": "90bf58595930e7d56cbe9fecb4ea647d5c0e3aec",
+      "lfs": {
+        "sha256": "8e505d95dd1561d47abd43d4238fd40d9bb1ae9e147ed0a4cba778d76ae4db48",
+        "size": 605254808,
+        "pointerSize": 134
+      }
+    },
+    {
+      "rfilename": "config.json",
+      "size": 724,
+      "blobId": "589da721fbaa887c9a07e46a1d4f412e53947a49"
+    },
+    {
+      "rfilename": "merges.txt",
+      "size": 1671839,
+      "blobId": "20024bfe7c83998e9aeaf98a0cd6a2ce6306c2f0"
+    },
+    {
+      "rfilename": "text_encoder.safetensors",
+      "size": 15804791921,
+      "blobId": "9e5bc905688f8b033a7bf669365b3caca82b7b99",
+      "lfs": {
+        "sha256": "00a6817a979848c94a60aa9c0c380b2e6cb7735363aaabfaf1a6678fe4748a7f",
+        "size": 15804791921,
+        "pointerSize": 136
+      }
+    },
+    {
+      "rfilename": "tokenizer.json",
+      "size": 7032403,
+      "blobId": "c6cc1014128b19d1fc46b1d30a23e3b1d35db421"
+    },
+    {
+      "rfilename": "tokenizer_config.json",
+      "size": 11003,
+      "blobId": "204d76f78dac6dedc820418c30bf01145de78a21"
+    },
+    {
+      "rfilename": "transformer.safetensors",
+      "size": 18698813290,
+      "blobId": "8511afcfb84d940ea1e24b1a8d5b22ae5d4d172d",
+      "lfs": {
+        "sha256": "a8e5a447024c373117e964034e33262659426d66b18320a5e36e80c82acd00ae",
+        "size": 18698813290,
+        "pointerSize": 136
+      }
+    },
+    {
+      "rfilename": "turbo_lora.safetensors",
+      "size": 779849816,
+      "blobId": "6fe2720553cf23aa2189eee94a3b43475c5a42ce",
+      "lfs": {
+        "sha256": "5a6eeba171cf183020a4ad48774bb2968f29f8168afd6ec17a04987f3528b4ea",
+        "size": 779849816,
+        "pointerSize": 134
+      }
+    },
+    {
+      "rfilename": "video_vae.safetensors",
+      "size": 5207808496,
+      "blobId": "56a63ef27e68f3b6d5cd4c704f51f291e40f3e11",
+      "lfs": {
+        "sha256": "7c1f131492e7eddacaac9069a61b81bdd39de5cc96561e677c5eab1cdce5e522",
+        "size": 5207808496,
+        "pointerSize": 135
+      }
+    },
+    {
+      "rfilename": "vocab.json",
+      "size": 2776833,
+      "blobId": "4783fe10ac3adce15ac8f358ef5462739852c569"
+    }
+  ]
+}

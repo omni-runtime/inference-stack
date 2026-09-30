@@ -1,0 +1,72 @@
+{% for service in backend_services %}
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: {{ service }}}
+spec:
+  replicas: {{ replicas.get(service, 1) }}
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: {{ service }}}}
+  template:
+    metadata:
+      labels: {app: {{ service }}}
+      annotations: {inference-stack/config-sha: '{{ config_sha }}'}
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+{% if not mock %}
+      runtimeClassName: {{ environment.kubernetes.runtime_class }}
+      nodeSelector: {kubernetes.io/hostname: {{ environment.kubernetes.node }}}
+{% endif %}
+      containers:
+        - name: model
+          image: {{ images.python if mock else images[backends[service].image] }}
+{% if mock %}
+          command: [python, -u, /config/mock_backend.py, --name, {{ service }}, --key-env, {{ backend_key_env[service] }}]
+{% else %}
+          command: {{ model_commands[service] | tojson }}
+{% endif %}
+          envFrom: [{secretRef: {name: inference-credentials}}]
+          env:
+            - {name: HF_HOME, value: /cache/huggingface}
+            - name: VLLM_API_KEY
+              valueFrom: {secretKeyRef: {name: inference-credentials, key: MODEL_API_KEY}}
+          readinessProbe: {httpGet: {path: /health, port: 8000}, periodSeconds: 5}
+          startupProbe: {httpGet: {path: /health, port: 8000}, periodSeconds: 10, failureThreshold: 90}
+          resources:
+            requests: {cpu: 100m, memory: {{ '64Mi' if mock else '2Gi' }}}
+            limits:
+              cpu: '{{ environment.resources.get("mock_cpus", 1) if mock else environment.resources.get("model_cpus", 4) }}'
+              memory: {{ environment.resources.get('mock_memory', '256Mi') if mock else environment.resources.model_memory }}
+{% if not mock %}
+              nvidia.com/gpu: 1
+{% endif %}
+          volumeMounts:
+            - {name: config, mountPath: /config, readOnly: true}
+            - {name: cache, mountPath: /cache}
+            - {name: outputs, mountPath: /outputs}
+{% if not mock %}
+            - {name: models, mountPath: /models, readOnly: true}
+            - {name: shm, mountPath: /dev/shm}
+{% endif %}
+      volumes:
+        - {name: config, configMap: {name: backend-config}}
+        - {name: cache, persistentVolumeClaim: {claimName: model-cache}}
+        - {name: outputs, persistentVolumeClaim: {claimName: model-outputs}}
+{% if not mock %}
+        - {name: models, hostPath: {path: {{ environment.kubernetes.model_root }}, type: Directory}}
+        - {name: shm, emptyDir: {medium: Memory, sizeLimit: 1Gi}}
+{% endif %}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: {{ service }}}
+spec:
+  selector: {app: {{ service }}}
+{% if not mock and backends[service].get('node_port') %}
+  type: NodePort
+  ports: [{name: http, port: 8000, targetPort: 8000, nodePort: {{ backends[service].node_port }}}]
+{% else %}
+  ports: [{name: http, port: 8000, targetPort: 8000}]
+{% endif %}
+---
+{% endfor %}

@@ -1,0 +1,4 @@
+name: local-vllm-omni
+pools:
+- vllm
+- omni

@@ -1,0 +1,12 @@
+{
+  "engine": "ddalcu/mlx-serve",
+  "version": "26.9.6",
+  "archive": "https://github.com/ddalcu/mlx-serve/releases/download/v26.9.6/mlx-serve-bin-macos-arm64.tar.gz",
+  "sha256": "bb4ec3f6ee250745a1d04ef685d3f15b734b560f482a65d0e8bacb512e78bacf",
+  "model": "ddalcu/MiniMax-H3-FL2VA-MLX-Serve-4bit",
+  "revision": "9c9273578ed5c2daf0b9a42eace823a6a49050ba",
+  "download_bytes": 41108035748,
+  "protocol": "mlx/video@1",
+  "api_format": "mlx_video",
+  "response": "rgb8 frames and pcm_s16le audio; optional progress SSE; client muxes media"
+}

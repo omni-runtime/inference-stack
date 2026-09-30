@@ -1,0 +1,37 @@
+# Optional SR-native protocol state helper. No public port or model execution.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: media-bindings}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: {requests: {storage: 1Gi}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: media-bindings}
+spec:
+  replicas: {{ media_store_replicas }}
+  strategy: {type: Recreate}
+  selector: {matchLabels: {app: media-bindings}}
+  template:
+    metadata: {labels: {app: media-bindings}}
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      containers:
+        - name: redis
+          image: {{ images.redis }}
+          args: [redis-server, --appendonly, 'yes', --appendfsync, always, --maxmemory, 64mb, --maxmemory-policy, noeviction]
+          readinessProbe: {exec: {command: [redis-cli, ping]}, periodSeconds: 5}
+          resources:
+            requests: {cpu: 50m, memory: 32Mi}
+            limits: {cpu: '1', memory: 256Mi}
+          volumeMounts: [{name: data, mountPath: /data}]
+      volumes: [{name: data, persistentVolumeClaim: {claimName: media-bindings}}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: media-bindings}
+spec:
+  selector: {app: media-bindings}
+  ports: [{name: redis, port: 6379, targetPort: 6379}]

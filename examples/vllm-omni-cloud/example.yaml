@@ -1,0 +1,5 @@
+name: vllm-omni-cloud
+pools:
+- vllm
+- omni
+- cloud

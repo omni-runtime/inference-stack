@@ -1,0 +1,4 @@
+name: vllm-cloud
+pools:
+- vllm
+- cloud

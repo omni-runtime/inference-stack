@@ -1,0 +1,1434 @@
+{
+  "release": "0.1.0-preview.10",
+  "kind": "sanitized historical acceptance evidence",
+  "tested_at": "2026-09-30",
+  "not_a_fresh_public_CI_run": true,
+  "suites": {
+    "amd64_mock": {
+      "passed": 48,
+      "failed": 0,
+      "original_report_sha256": "8e464450d8cfac34a1eb84c65545b79352f010e5e427a2dc4cc45cf0cf9fa024",
+      "cases": [
+        {
+          "case": "unauthenticated",
+          "status": 401,
+          "expected_statuses": [
+            401
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.44,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-auto",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 7.38,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-sse",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 604.69,
+          "first_byte_ms": null
+        },
+        {
+          "case": "speech-auto",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 2.48,
+          "first_byte_ms": null
+        },
+        {
+          "case": "speech-sse",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 2.04,
+          "first_byte_ms": null
+        },
+        {
+          "case": "speech-wrong-content-type",
+          "status": 415,
+          "expected_statuses": [
+            415
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.27,
+          "first_byte_ms": null
+        },
+        {
+          "case": "speech-unknown-field",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.48,
+          "first_byte_ms": null
+        },
+        {
+          "case": "explicit-model-cannot-bypass",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.44,
+          "first_byte_ms": null
+        },
+        {
+          "case": "local-only-chat-with-forged-headers",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm"
+          ],
+          "error": null,
+          "duration_ms": 3.64,
+          "first_byte_ms": null
+        },
+        {
+          "case": "cloud-only-chat-with-forged-headers",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 4.29,
+          "first_byte_ms": null
+        },
+        {
+          "case": "caller-workflow-vision",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 44.68,
+          "first_byte_ms": null
+        },
+        {
+          "case": "caller-workflow-speech",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 2.16,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-stream-cancel",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 3.65,
+          "first_byte_ms": 3.56
+        },
+        {
+          "case": "chat-stream-interrupt",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 204.24,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-text",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 2.15,
+          "first_byte_ms": null
+        },
+        {
+          "case": "local-only-video",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.85,
+          "first_byte_ms": null
+        },
+        {
+          "case": "cloud-only-video",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.92,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-invalid-unknown",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.57,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-invalid-local-path",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.52,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-invalid-duration",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.42,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-invalid-duplicate",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.36,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-invalid-missing-prompt",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.42,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-invalid-file-id",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.5,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-explicit-model",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.37,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-content-type",
+          "status": 415,
+          "expected_statuses": [
+            415
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.11,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-mixed-output",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 2.49,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-mixed-output-sse",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 2.08,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-audio-only-output",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 2.0,
+          "first_byte_ms": null
+        },
+        {
+          "case": "local-only-mixed-output",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.8,
+          "first_byte_ms": null
+        },
+        {
+          "case": "cloud-only-mixed-output",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.81,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-output-invalid-modality",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.4,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-output-invalid-duplicate",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.22,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-output-invalid-format",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.16,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-output-invalid-field",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.14,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-json",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "mlx-h3"
+          ],
+          "error": null,
+          "duration_ms": 3.84,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-sse",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "mlx-h3"
+          ],
+          "error": null,
+          "duration_ms": 73.5,
+          "first_byte_ms": 32.68
+        },
+        {
+          "case": "local-only-mlx-video",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "mlx-h3"
+          ],
+          "error": null,
+          "duration_ms": 4.76,
+          "first_byte_ms": null
+        },
+        {
+          "case": "cloud-only-mlx-video",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 2.04,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-backend-error",
+          "status": 422,
+          "expected_statuses": [
+            422
+          ],
+          "expected_backend_set": [
+            "mlx-h3"
+          ],
+          "error": null,
+          "duration_ms": 43.54,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-explicit-model",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.81,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-content-type",
+          "status": 415,
+          "expected_statuses": [
+            415
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.19,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-unknown",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.53,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-dimension",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.62,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-turbo-steps",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.39,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-local-path",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.51,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-refs",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.37,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-chat-budget",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.28,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-keyframe-url",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.48,
+          "first_byte_ms": null
+        }
+      ]
+    },
+    "arm64_mock": {
+      "passed": 48,
+      "failed": 0,
+      "original_report_sha256": "b062c4d1f23e7dec18bcebf53fa1961cea709911c422a7d50794df5f3ce4ba71",
+      "cases": [
+        {
+          "case": "unauthenticated",
+          "status": 401,
+          "expected_statuses": [
+            401
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 5.28,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-auto",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 6.45,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-sse",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 613.19,
+          "first_byte_ms": null
+        },
+        {
+          "case": "speech-auto",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 6.38,
+          "first_byte_ms": null
+        },
+        {
+          "case": "speech-sse",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.47,
+          "first_byte_ms": null
+        },
+        {
+          "case": "speech-wrong-content-type",
+          "status": 415,
+          "expected_statuses": [
+            415
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 3.45,
+          "first_byte_ms": null
+        },
+        {
+          "case": "speech-unknown-field",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 3.4,
+          "first_byte_ms": null
+        },
+        {
+          "case": "explicit-model-cannot-bypass",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.13,
+          "first_byte_ms": null
+        },
+        {
+          "case": "local-only-chat-with-forged-headers",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm"
+          ],
+          "error": null,
+          "duration_ms": 6.87,
+          "first_byte_ms": null
+        },
+        {
+          "case": "cloud-only-chat-with-forged-headers",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 6.39,
+          "first_byte_ms": null
+        },
+        {
+          "case": "caller-workflow-vision",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 47.34,
+          "first_byte_ms": null
+        },
+        {
+          "case": "caller-workflow-speech",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 5.7,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-stream-cancel",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 7.24,
+          "first_byte_ms": 7.14
+        },
+        {
+          "case": "chat-stream-interrupt",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 207.86,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-text",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 6.41,
+          "first_byte_ms": null
+        },
+        {
+          "case": "local-only-video",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 5.47,
+          "first_byte_ms": null
+        },
+        {
+          "case": "cloud-only-video",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 5.32,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-invalid-unknown",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.85,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-invalid-local-path",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.65,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-invalid-duration",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.5,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-invalid-duplicate",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.59,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-invalid-missing-prompt",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.5,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-invalid-file-id",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.47,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-explicit-model",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.57,
+          "first_byte_ms": null
+        },
+        {
+          "case": "video-content-type",
+          "status": 415,
+          "expected_statuses": [
+            415
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.11,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-mixed-output",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 6.07,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-mixed-output-sse",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 5.92,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-audio-only-output",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 6.12,
+          "first_byte_ms": null
+        },
+        {
+          "case": "local-only-mixed-output",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 6.14,
+          "first_byte_ms": null
+        },
+        {
+          "case": "cloud-only-mixed-output",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 5.18,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-output-invalid-modality",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 5.23,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-output-invalid-duplicate",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 5.25,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-output-invalid-format",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.4,
+          "first_byte_ms": null
+        },
+        {
+          "case": "chat-output-invalid-field",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.12,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-json",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "mlx-h3"
+          ],
+          "error": null,
+          "duration_ms": 9.76,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-sse",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "mlx-h3"
+          ],
+          "error": null,
+          "duration_ms": 72.27,
+          "first_byte_ms": 6.95
+        },
+        {
+          "case": "local-only-mlx-video",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "mlx-h3"
+          ],
+          "error": null,
+          "duration_ms": 7.97,
+          "first_byte_ms": null
+        },
+        {
+          "case": "cloud-only-mlx-video",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 5.16,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-backend-error",
+          "status": 422,
+          "expected_statuses": [
+            422
+          ],
+          "expected_backend_set": [
+            "mlx-h3"
+          ],
+          "error": null,
+          "duration_ms": 6.23,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-explicit-model",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 3.91,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-content-type",
+          "status": 415,
+          "expected_statuses": [
+            415
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 3.57,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-unknown",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 3.75,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-dimension",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 3.73,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-turbo-steps",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 3.88,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-local-path",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 3.71,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-refs",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.02,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-chat-budget",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 3.7,
+          "first_byte_ms": null
+        },
+        {
+          "case": "mlx-video-invalid-keyframe-url",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 3.98,
+          "first_byte_ms": null
+        }
+      ]
+    },
+    "amd64_real_text_cloud": {
+      "passed": 8,
+      "failed": 0,
+      "original_report_sha256": "182433e4fc4e83c43659dff00f135df43dcc3a13c43b63038dfc755d186a93e4",
+      "cases": [
+        {
+          "case": "real-unauthenticated",
+          "status": 401,
+          "expected_statuses": [
+            401
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 3.43,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-chat-auto",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 1117.85,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-chat-sse",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 1124.52,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-local-only-forged-header",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm"
+          ],
+          "error": null,
+          "duration_ms": 1065.54,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-cloud-only-forged-header",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 2240.44,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-explicit-model-rejected",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 1.97,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-vision",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 1728.81,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-speech",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 2.35,
+          "first_byte_ms": null
+        }
+      ]
+    },
+    "arm64_real_text_cloud": {
+      "passed": 8,
+      "failed": 0,
+      "original_report_sha256": "b8c6d6b9c89d5656dcfa3141c5702196b75f962590208a527dd8d1b7998c8b9d",
+      "cases": [
+        {
+          "case": "real-unauthenticated",
+          "status": 401,
+          "expected_statuses": [
+            401
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 9.97,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-chat-auto",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 1141.07,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-chat-sse",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 1102.58,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-local-only-forged-header",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm"
+          ],
+          "error": null,
+          "duration_ms": 1096.59,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-cloud-only-forged-header",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 2404.45,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-explicit-model-rejected",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 6.02,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-vision",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "error": null,
+          "duration_ms": 2168.81,
+          "first_byte_ms": null
+        },
+        {
+          "case": "real-speech",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 6.8,
+          "first_byte_ms": null
+        }
+      ]
+    },
+    "h3_real": {
+      "passed": 3,
+      "failed": 0,
+      "original_report_sha256": "deb0dfc8eeee16d312df12362ffff031a03e2f7a69f48b9e76cc162de0ef144b",
+      "cases": [
+        {
+          "case": "h3-cloud-scope-rejected",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 5.34,
+          "first_byte_ms": null
+        },
+        {
+          "case": "h3-explicit-model-rejected",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 5.31,
+          "first_byte_ms": null
+        },
+        {
+          "case": "h3-real-short-video",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "mlx-h3"
+          ],
+          "error": null,
+          "duration_ms": 12605.19,
+          "first_byte_ms": 72.16
+        }
+      ]
+    },
+    "h3_after_restart": {
+      "passed": 3,
+      "failed": 0,
+      "original_report_sha256": "49c7b2888b733c64e4dc3bae291fab7be12bc9f256b73303c80a817d68495cab",
+      "cases": [
+        {
+          "case": "h3-cloud-scope-rejected",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 8.96,
+          "first_byte_ms": null
+        },
+        {
+          "case": "h3-explicit-model-rejected",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "error": null,
+          "duration_ms": 4.08,
+          "first_byte_ms": null
+        },
+        {
+          "case": "h3-real-short-video",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "mlx-h3"
+          ],
+          "error": null,
+          "duration_ms": 10480.91,
+          "first_byte_ms": 73.66
+        }
+      ]
+    }
+  },
+  "scope": "Real native SR + Envoy; mock cases use explicit mock model backends. Real suites use Qwen3 text, cloud text/vision and MLX-Serve H3. Raw host logs, addresses, tokens and kubeconfigs are excluded.",
+  "limits": [
+    "H3 FL2VA short clip only; not a long-video or performance acceptance",
+    "No full historical 781-case matrix rerun for preview.10",
+    "Public template addresses require operator configuration"
+  ]
+}

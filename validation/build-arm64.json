@@ -1,0 +1,14 @@
+{
+  "reference": "docker.io/inference-stack/semantic-router-multimodal@sha256:303c77ab05e4f12d25ada3885b94f7d627f45abbea8d5a1ab116306c096f7398",
+  "tag": "docker.io/inference-stack/semantic-router-multimodal:dev-3160d62a4e63-arm64",
+  "digest": "sha256:303c77ab05e4f12d25ada3885b94f7d627f45abbea8d5a1ab116306c096f7398",
+  "platform": "linux/arm64",
+  "config_digest": "sha256:d546a2be298018c7d415e1dd7e586af21b9c1a2f7abf214bb54e2a566d419f14",
+  "base_digest": "sha256:295a7da1ac432c950667083208a5a227e695efdc7b53502139d4c80c0b18b061",
+  "binary_digest": "sha256:710e13e056dcd72f7501e3a8a0fb982601ec21fa715c33405b045919bcc9a031",
+  "patch_digest": "3160d62a4e63d59079ab4b744314a991ef004addae15fe86b248bb59aacaddce",
+  "upstream_commit": "5aa0145eb16ddf7edcc40a87793f61260e8c5084",
+  "build_method": "cross-cgo-qemu-tests-plus-verified-oci-layer",
+  "acceptance": "See preview.10.json; historical locally imported OCI artifact",
+  "distribution": "not published to public registry"
+}

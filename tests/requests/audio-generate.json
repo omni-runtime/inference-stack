@@ -1,0 +1,10 @@
+{
+  "model": "auto",
+  "input": "gentle rainfall",
+  "response_format": "wav",
+  "audio_length": 0.1,
+  "audio_start": 0,
+  "guidance_scale": 7,
+  "num_inference_steps": 4,
+  "seed": 7
+}

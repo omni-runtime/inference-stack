@@ -1,0 +1,23 @@
+name: hybrid
+runtime: kubernetes
+platform: linux/arm64
+project: inference-stack
+root: /opt/omni-runtime/inference-stack
+release: contracts/release.yaml
+kubernetes:
+  ssh: operator@gateway.example.test
+  context: colima-inference-stack
+  kubeconfig: /opt/omni-runtime/inference-stack/environments/hybrid/kubeconfig
+  namespace: inference-stack
+  node: colima-inference-stack
+  gateway_node_port: 30800
+resources:
+  router_memory: 1Gi
+  router_cpus: 2
+  envoy_memory: 512Mi
+  envoy_cpus: 2
+  mock_memory: 256Mi
+  mock_cpus: 1
+  gpu_count: 0
+  local_engines_concurrent: false
+  reason: Gateway-only ARM64 VM; external text on NVIDIA host and H3 on macOS Metal.

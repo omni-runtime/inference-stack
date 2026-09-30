@@ -1,0 +1,472 @@
+models:
+- name: local/text
+  pool: vllm
+  service: vllm
+  provider_model_id: local/text
+  api_format: openai
+  provider: vllm
+  api_key_env: MODEL_API_KEY
+  base_url: http://vllm:8000/v1
+  capabilities:
+  - text
+  - tools
+  - structured_json
+  context_window: 2048
+  max_output_tokens: 512
+  model_directory: Qwen3-0.6B
+  revision: c1899de289a04d12100db370d81485cdf75e47ca
+  deployment:
+    image: vllm
+    replicas: 1
+    command:
+    - vllm
+    - serve
+    - /models/Qwen3-0.6B
+    - --served-model-name
+    - local/text
+    - --host
+    - 0.0.0.0
+    - --port
+    - '8000'
+    - --max-model-len
+    - '2048'
+    - --gpu-memory-utilization
+    - '0.65'
+    - --enforce-eager
+- name: local/speech
+  pool: omni
+  service: omni
+  provider_model_id: local/speech
+  api_format: speech
+  provider: vllm-omni
+  api_key_env: MODEL_API_KEY
+  base_url: http://omni:8000/v1
+  capabilities:
+  - text
+  - speech_generation
+  context_window: 8192
+  max_output_tokens: 2048
+  model_directory: Qwen3-TTS-12Hz-0.6B-CustomVoice
+  revision: 85e237c12c027371202489a0ec509ded67b5e4b5
+  deployment:
+    image: omni
+    replicas: 1
+    command:
+    - vllm
+    - serve
+    - /models/Qwen3-TTS-12Hz-0.6B-CustomVoice
+    - --omni
+    - --served-model-name
+    - local/speech
+    - --host
+    - 0.0.0.0
+    - --port
+    - '8000'
+    - --enforce-eager
+    - --trust-remote-code
+- name: cloud/chat
+  pool: cloud
+  service: cloud
+  provider_model_id: qwen3.8-flash
+  api_format: openai
+  provider: openai
+  api_key_env: CLOUD_API_KEY
+  base_url: https://api.example.com/v1
+  capabilities:
+  - text
+  - image_input
+  - tools
+  - structured_json
+  - audio_input
+  - video_input
+  - audio_output
+  context_window: 32768
+  max_output_tokens: 2048
+  validation: pending-new-project-probe
+- name: local/images
+  pool: omni
+  service: omni-images
+  provider_model_id: local/images
+  api_format: images
+  provider: vllm-omni
+  api_key_env: MODEL_API_KEY
+  base_url: http://omni-images:8000/v1
+  capabilities:
+  - text
+  - image_generation
+  context_window: 512
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: cloud/images
+  pool: cloud
+  service: cloud-images
+  provider_model_id: cloud/images
+  api_format: images
+  provider: vllm-omni
+  api_key_env: CLOUD_API_KEY
+  base_url: http://cloud-images:8000/v1
+  capabilities:
+  - text
+  - image_generation
+  context_window: 512
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: omni/audio
+  pool: omni
+  service: omni-audio
+  provider_model_id: omni/audio
+  api_format: audio_generate
+  provider: vllm-omni
+  api_key_env: MODEL_API_KEY
+  base_url: http://omni-audio:8000/v1
+  capabilities:
+  - text
+  - audio_generation
+  context_window: 512
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: cloud/audio
+  pool: cloud
+  service: cloud-audio
+  provider_model_id: cloud/audio
+  api_format: audio_generate
+  provider: vllm-omni
+  api_key_env: CLOUD_API_KEY
+  base_url: http://cloud-audio:8000/v1
+  capabilities:
+  - text
+  - audio_generation
+  context_window: 512
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: local/multimodal-chat
+  pool: omni
+  service: omni-chat
+  provider_model_id: local/multimodal-chat
+  api_format: openai
+  provider: vllm-omni
+  api_key_env: MODEL_API_KEY
+  base_url: http://omni-chat:8000/v1
+  capabilities:
+  - text
+  - image_input
+  - audio_input
+  - video_input
+  - tools
+  - structured_json
+  - audio_output
+  context_window: 32768
+  max_output_tokens: 512
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: vllm/transcription
+  pool: vllm
+  service: vllm-asr
+  provider_model_id: mock-asr
+  api_format: transcription
+  provider: vllm
+  api_key_env: MODEL_API_KEY
+  base_url: http://vllm-asr:8000/v1
+  capabilities:
+  - text
+  - audio_input
+  - transcription
+  context_window: 32768
+  max_output_tokens: 512
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: vllm/translation
+  pool: vllm
+  service: vllm-asr
+  provider_model_id: mock-asr
+  api_format: translation
+  provider: vllm
+  api_key_env: MODEL_API_KEY
+  base_url: http://vllm-asr:8000/v1
+  capabilities:
+  - text
+  - audio_input
+  - translation
+  context_window: 32768
+  max_output_tokens: 512
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: cloud/transcription
+  pool: cloud
+  service: cloud-asr
+  provider_model_id: mock-asr
+  api_format: transcription
+  provider: vllm
+  api_key_env: CLOUD_API_KEY
+  base_url: http://cloud-asr:8000/v1
+  capabilities:
+  - text
+  - audio_input
+  - transcription
+  context_window: 32768
+  max_output_tokens: 512
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: cloud/translation
+  pool: cloud
+  service: cloud-asr
+  provider_model_id: mock-asr
+  api_format: translation
+  provider: vllm
+  api_key_env: CLOUD_API_KEY
+  base_url: http://cloud-asr:8000/v1
+  capabilities:
+  - text
+  - audio_input
+  - translation
+  context_window: 32768
+  max_output_tokens: 512
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: omni/image-edit
+  pool: omni
+  service: omni-images
+  provider_model_id: omni/images
+  api_format: image_edit
+  provider: vllm-omni
+  api_key_env: MODEL_API_KEY
+  base_url: http://omni-images:8000/v1
+  capabilities:
+  - text
+  - image_input
+  - image_editing
+  context_window: 32768
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: cloud/image-edit
+  pool: cloud
+  service: cloud-images
+  provider_model_id: cloud/images
+  api_format: image_edit
+  provider: vllm-omni
+  api_key_env: CLOUD_API_KEY
+  base_url: http://cloud-images:8000/v1
+  capabilities:
+  - text
+  - image_input
+  - image_editing
+  context_window: 32768
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: omni/video
+  pool: omni
+  service: omni-video
+  provider_model_id: omni/video
+  api_format: video_sync
+  provider: vllm-omni
+  api_key_env: MODEL_API_KEY
+  base_url: http://omni-video:8000/v1
+  capabilities:
+  - text
+  - image_input
+  - audio_input
+  - video_input
+  - video_generation
+  - video_output
+  - audio_output
+  context_window: 131072
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+    config_files:
+      blue.mp4: tests/requests/assets/blue.mp4
+- name: cloud/video
+  pool: cloud
+  service: cloud-video
+  provider_model_id: cloud/video
+  api_format: video_sync
+  provider: vllm-omni
+  api_key_env: CLOUD_API_KEY
+  base_url: http://cloud-video:8000/v1
+  capabilities:
+  - text
+  - image_input
+  - audio_input
+  - video_input
+  - video_generation
+  - video_output
+  - audio_output
+  context_window: 131072
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+    config_files:
+      blue.mp4: tests/requests/assets/blue.mp4
+- name: omni/video-async
+  pool: omni
+  service: omni-video
+  provider_model_id: omni/video
+  api_format: video
+  provider: vllm-omni
+  api_key_env: MODEL_API_KEY
+  base_url: http://omni-video:8000/v1
+  capabilities:
+  - text
+  - image_input
+  - audio_input
+  - video_input
+  - video_generation
+  - video_output
+  - audio_output
+  context_window: 131072
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+    config_files:
+      blue.mp4: tests/requests/assets/blue.mp4
+  stateful_instance: omni-video-single-instance-v1
+- name: cloud/video-async
+  pool: cloud
+  service: cloud-video
+  provider_model_id: cloud/video
+  api_format: video
+  provider: vllm-omni
+  api_key_env: CLOUD_API_KEY
+  base_url: http://cloud-video:8000/v1
+  capabilities:
+  - text
+  - image_input
+  - audio_input
+  - video_input
+  - video_generation
+  - video_output
+  - audio_output
+  context_window: 131072
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+    config_files:
+      blue.mp4: tests/requests/assets/blue.mp4
+  stateful_instance: cloud-video-single-instance-v1
+- name: vllm/realtime
+  pool: vllm
+  service: vllm-asr
+  provider_model_id: mock-asr
+  api_format: realtime
+  provider: vllm
+  api_key_env: MODEL_API_KEY
+  base_url: http://vllm-asr:8000/v1
+  capabilities:
+  - text
+  - realtime
+  - audio_input
+  context_window: 32768
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: omni/realtime
+  pool: omni
+  service: omni-chat
+  provider_model_id: local/multimodal-chat
+  api_format: realtime
+  provider: vllm-omni
+  api_key_env: MODEL_API_KEY
+  base_url: http://omni-chat:8000/v1
+  capabilities:
+  - text
+  - realtime
+  - audio_input
+  - audio_output
+  context_window: 32768
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: cloud/realtime
+  pool: cloud
+  service: cloud-asr
+  provider_model_id: mock-asr
+  api_format: realtime
+  provider: vllm-omni
+  api_key_env: CLOUD_API_KEY
+  base_url: http://cloud-asr:8000/v1
+  capabilities:
+  - text
+  - realtime
+  - audio_input
+  - audio_output
+  context_window: 32768
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+- name: omni/speech-stream
+  pool: omni
+  service: omni
+  provider_model_id: local/speech
+  api_format: speech_stream
+  provider: vllm-omni
+  api_key_env: MODEL_API_KEY
+  base_url: http://omni:8000/v1
+  capabilities:
+  - text
+  - realtime
+  - speech_generation
+  - audio_output
+  context_window: 32768
+  max_output_tokens: 0
+  model_directory: Qwen3-TTS-12Hz-0.6B-CustomVoice
+  revision: 85e237c12c027371202489a0ec509ded67b5e4b5
+  deployment:
+    image: omni
+    replicas: 1
+    command:
+    - vllm
+    - serve
+    - /models/Qwen3-TTS-12Hz-0.6B-CustomVoice
+    - --omni
+    - --served-model-name
+    - local/speech
+    - --host
+    - 0.0.0.0
+    - --port
+    - '8000'
+    - --enforce-eager
+    - --trust-remote-code
+  validation: mock-only
+- name: cloud/speech-stream
+  pool: cloud
+  service: cloud-audio
+  provider_model_id: cloud/audio
+  api_format: speech_stream
+  provider: vllm-omni
+  api_key_env: CLOUD_API_KEY
+  base_url: http://cloud-audio:8000/v1
+  capabilities:
+  - text
+  - realtime
+  - speech_generation
+  - audio_output
+  context_window: 32768
+  max_output_tokens: 0
+  validation: mock-only
+  deployment:
+    replicas: 1
+mock_only: true

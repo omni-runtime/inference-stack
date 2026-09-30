@@ -1,0 +1,7 @@
+# Colima profile override: ~/.colima/inference-stack/containerd/config.toml
+# Use the pause image in the verified K3s ARM64 air-gap image archive.
+version = 3
+[grpc]
+  gid = 1000
+[plugins.'io.containerd.cri.v1.images'.pinned_images]
+  sandbox = 'docker.io/rancher/mirrored-pause:3.10.2'

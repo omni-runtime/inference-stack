@@ -1,0 +1,28 @@
+name: kubernetes
+runtime: kubernetes
+platform: linux/amd64
+project: inference-stack
+root: /srv/inference-stack
+release: contracts/release.yaml
+kubernetes:
+  ssh: operator@gateway.example.test
+  context: default
+  kubeconfig: /srv/inference-stack/environments/kubernetes/kubeconfig
+  namespace: inference-stack
+  node: gpu-node
+  gateway_node_port: 30800
+  runtime_class: nvidia
+  model_root: /srv/models
+resources:
+  router_memory: 1Gi
+  router_cpus: 2
+  envoy_memory: 512Mi
+  envoy_cpus: 2
+  mock_memory: 256Mi
+  mock_cpus: 1
+  model_memory: 8Gi
+  model_cpus: 4
+  gpu_count: 1
+  local_engines_concurrent: false
+  reason: Single 6 GiB GPU; simultaneous real-engine capacity unverified. Never stop
+    another model automatically.

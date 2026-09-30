@@ -1,0 +1,50 @@
+services:{{ ' {}' if not backend_services else '' }}
+{% for service in backend_services %}
+  {{ service }}:
+    image: {{ images[backends[service].image] if not mock else images.python }}
+    platform: {{ environment.platform }}
+    labels: {inference-stack.config-sha256: {{ config_sha | tojson }}}
+{% if mock %}
+    entrypoint: [/bin/sh, /config/mock-entrypoint.sh]
+    command: [python, -u, /config/mock_backend.py, --name, {{ service }}, --key-env, {{ backend_key_env[service] }}]
+    deploy:
+      replicas: {{ replicas[service] }}
+{% else %}
+    entrypoint: [/bin/sh, /config/model-entrypoint.sh]
+    command: {{ model_commands[service] | tojson }}
+    deploy:
+      replicas: {{ replicas[service] }}
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: {{ environment.resources.gpu_device_ids | tojson }}
+              capabilities: [gpu]
+{% endif %}
+    volumes:
+      - {type: volume, source: config, target: /config, read_only: true, volume: {subpath: "releases/{{ config_sha }}"}}
+      - {type: volume, source: credentials, target: /run/secrets, read_only: true}
+      - {type: volume, source: cache, target: /cache}
+      - {type: volume, source: outputs, target: /outputs}
+{% if not mock %}
+      - type: bind
+        source: {{ environment.docker.allowed_readonly_model_source }}
+        target: {{ environment.docker.model_target }}
+        read_only: true
+        bind: {create_host_path: false}
+{% endif %}
+    environment: {HF_HOME: /cache/huggingface}
+    networks: [inference]
+    restart: unless-stopped
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    shm_size: 1gb
+    mem_limit: {{ environment.resources.get('mock_memory', '256m') if mock else environment.resources.model_memory }}
+    cpus: {{ environment.resources.get('mock_cpus', 1) if mock else environment.resources.get('model_cpus', 4) }}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 90
+      start_period: 60s
+{% endfor %}

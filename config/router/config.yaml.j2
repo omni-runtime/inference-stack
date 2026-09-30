@@ -1,0 +1,83 @@
+version: v0.3
+listeners:
+  - name: inference
+    address: 0.0.0.0
+    port: 8000
+    timeout: 120s
+providers:
+  models:
+{% for model in models %}
+    - name: {{ model.name | tojson }}
+      provider_model_id: {{ model.provider_model_id | tojson }}
+      api_format: {{ model.api_format }}
+      backend_refs:
+        - name: {{ model.service }}
+          base_url: {{ model.base_url | tojson }}
+          provider: {{ model.provider }}
+          api_key_env: {{ model.api_key_env }}
+          weight: 1
+{% endfor %}
+routing:
+  strategy: priority
+  candidate_requirements:
+    capabilities: declared
+    context: known_limits
+  data_policy:
+    replay: false
+  decisions:
+    - name: capable-backend
+      priority: 1
+      rules: {operator: AND, conditions: []}
+      algorithm: {type: static}
+      modelRefs:
+{% for model in models %}
+        - model: {{ model.name | tojson }}
+{% endfor %}
+  modelCards:
+{% for model in models %}
+    - name: {{ model.name | tojson }}
+      context_window_size: {{ model.context_window }}
+      max_output_tokens: {{ model.max_output_tokens }}
+      capabilities: {{ model.capabilities | tojson }}
+{% endfor %}
+entrypoints:
+{% for scope, candidates in scopes.items() %}
+  - model_names: [{{ scope | tojson }}]
+    recipe: {{ scope }}
+{% endfor %}
+recipes:
+{% for scope, candidates in scopes.items() %}
+  - name: {{ scope }}
+    routing:
+      strategy: priority
+      candidate_requirements: {capabilities: declared, context: known_limits}
+      data_policy: {replay: false}
+      decisions:
+        - name: {{ scope }}-capable-backend
+          priority: 1
+          rules: {operator: AND, conditions: []}
+          algorithm: {type: static}
+          modelRefs:
+{% for model in candidates %}
+            - model: {{ model.name | tojson }}
+{% endfor %}
+{% endfor %}
+global:
+  router:
+    auto_model_names: [auto]
+    require_entrypoint: true
+    include_config_models_in_list: false
+    skip_processing: {enabled: false}
+    fallback: {version: 1, enabled: false}
+  stores:
+    response_cache: {enabled: false, backend_type: memory}
+{% if video_models %}
+    media_bindings:
+      address: media-bindings:6379
+      ttl_seconds: 3600
+      max_total_bytes: 16777216
+      instances:
+{% for model in video_models %}
+        {{ model.name | tojson }}: {{ model.stateful_instance | tojson }}
+{% endfor %}
+{% endif %}

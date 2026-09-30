@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>Label</key><string>local.inference-stack.mlx</string>
+<key>ProgramArguments</key><array><string>/usr/bin/python3</string><string>/opt/omni-runtime/inference-stack/tools/host-mlx/serve.py</string></array>
+<key>WorkingDirectory</key><string>/opt/omni-runtime/host-mlx/bin/mlx-serve-macos-arm64</string>
+<key>RunAtLoad</key><true/>
+<key>KeepAlive</key><true/>
+<key>ThrottleInterval</key><integer>30</integer>
+<key>StandardOutPath</key><string>/opt/omni-runtime/host-mlx/logs/server.log</string>
+<key>StandardErrorPath</key><string>/opt/omni-runtime/host-mlx/logs/server.log</string>
+</dict></plist>

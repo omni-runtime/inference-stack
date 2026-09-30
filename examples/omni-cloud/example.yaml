@@ -1,0 +1,4 @@
+name: omni-cloud
+pools:
+- omni
+- cloud

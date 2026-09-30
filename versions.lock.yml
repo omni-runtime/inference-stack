@@ -1,0 +1,27 @@
+schema_version: 1
+python: '>=3.12'
+upstream_sr_commit: 5aa0145eb16ddf7edcc40a87793f61260e8c5084
+images:
+  router: docker.io/inference-stack/semantic-router-multimodal@sha256:00fb9b9823377334c9976932dd13aa1d3e9da91ab6003ca66b917085729a1acf
+  envoy: docker.io/envoyproxy/envoy@sha256:05ca04d64e3b899f73e64a9ff4a2cf0407bc8bba060cb579229421e125d74ca9
+  vllm: docker.io/vllm/vllm-omni@sha256:6f8be103eaf0055448cf7578cfd621405fd669079d4361bd58896326b2bf722a
+  omni: docker.io/vllm/vllm-omni@sha256:6f8be103eaf0055448cf7578cfd621405fd669079d4361bd58896326b2bf722a
+  python: docker.io/library/python@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e
+  redis: docker.io/library/redis@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+verification:
+  status: development
+  docker_engine_observed: 29.5.2
+  docker_desktop_observed: 4.76.0
+  host_compose: 5.1.4
+  tools_compose: 5.5.1
+  tools_docker_cli: 29.8.1
+  tools_image_observed: sha256:5dcf1fed0c72e1509f7271e61c17d49917eb5e52dd49e4635db5562372e223f8
+  controller_transport_go: 1.25.4
+  platforms_tested:
+  - linux/amd64
+  - linux/arm64
+  vllm_observed: 0.28.0
+  vllm_omni_observed: 0.28.0
+  torch_observed: 2.13.0+cu130
+  transformers_observed: 5.14.1
+  redis_pinned: 7.4.11-alpine

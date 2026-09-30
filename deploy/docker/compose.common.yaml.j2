@@ -1,0 +1,87 @@
+services:
+{% if video_models %}
+  media-bindings:
+    image: {{ images.redis }}
+    platform: {{ environment.platform }}
+    labels: {inference-stack.config-sha256: {{ config_sha | tojson }}}
+    user: redis
+    command: [redis-server, --appendonly, 'yes', --appendfsync, always, --maxmemory, 64mb, --maxmemory-policy, noeviction]
+    deploy: {replicas: {{ media_store_replicas }}}
+    volumes: [{type: volume, source: media_bindings, target: /data}]
+    networks: [inference]
+    restart: unless-stopped
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    cpus: 1
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+{% endif %}
+  router:
+    image: {{ images.router }}
+    platform: {{ environment.platform }}
+    labels: {inference-stack.config-sha256: {{ config_sha | tojson }}}
+    command: ["--config=/config/router.yaml", "--secure=false"]
+    deploy: {replicas: {{ router_replicas }}}
+    entrypoint: ["/bin/sh", "/config/router-entrypoint.sh"]
+    environment:
+      SR_LOG_LEVEL: info
+    volumes:
+      - {type: volume, source: config, target: /config, read_only: true, volume: {subpath: "releases/{{ config_sha }}"}}
+      - {type: volume, source: credentials, target: /run/secrets, read_only: true}
+    networks: [inference]
+    restart: unless-stopped
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: {{ environment.resources.router_memory }}
+    cpus: {{ environment.resources.get('router_cpus', 2) }}
+    healthcheck:
+      test: [CMD, python3, -c, "import socket; socket.create_connection(('127.0.0.1',50051),2).close()"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+      start_period: 10s
+  envoy:
+    image: {{ images.envoy }}
+    platform: {{ environment.platform }}
+    labels: {inference-stack.config-sha256: {{ config_sha | tojson }}}
+    # The image's root entrypoint chowns stdout/stderr, which requires CHOWN.
+    # Start Envoy directly so the service can retain cap_drop: ALL.
+    entrypoint: [envoy]
+    command: ["-c", "/config/envoy.yaml", "--concurrency", "2"]
+    deploy: {replicas: {{ envoy_replicas }}}
+    ports: ["{{ environment.docker.gateway_bind }}:{{ environment.docker.gateway_port }}:8000"]
+    volumes:
+      - {type: volume, source: config, target: /config, read_only: true, volume: {subpath: "releases/{{ config_sha }}"}}
+      - {type: volume, source: credentials, target: /run/secrets, read_only: true}
+    networks: [inference]
+    restart: unless-stopped
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: {{ environment.resources.get('envoy_memory', '512m') }}
+    cpus: {{ environment.resources.get('envoy_cpus', 2) }}
+{% if router_replicas %}
+    depends_on:
+      router: {condition: service_healthy}
+{% endif %}
+    healthcheck:
+      test: [CMD, timeout, '2', bash, /config/http-health.sh, 127.0.0.1, '8000', /health]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+networks:
+  inference: {}
+volumes:
+{% if video_models %}
+  media_bindings:
+    name: {{ environment.docker.volumes.media_bindings }}
+    external: true
+{% endif %}
+{% for name in ['config','credentials','cache','outputs'] %}
+  {{ name }}:
+    name: {{ environment.docker.volumes[name] }}
+    external: true
+{% endfor %}

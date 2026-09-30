@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: envoy}
+spec:
+  replicas: {{ envoy_replicas }}
+  selector: {matchLabels: {app: envoy}}
+  template:
+    metadata:
+      labels: {app: envoy}
+      annotations: {inference-stack/config-sha: '{{ config_sha }}'}
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      containers:
+        - name: envoy
+          image: {{ images.envoy }}
+          args: [-c, /config/envoy.yaml, --concurrency, '2']
+          resources:
+            requests: {cpu: 100m, memory: 64Mi}
+            limits: {cpu: '{{ environment.resources.get("envoy_cpus", 2) }}', memory: {{ environment.resources.get("envoy_memory", "512Mi") }}}
+          readinessProbe: {httpGet: {path: /health, port: 8000}, periodSeconds: 5}
+          volumeMounts:
+            - {name: config, mountPath: /config, readOnly: true}
+            - {name: credentials, mountPath: /run/secrets, readOnly: true}
+      volumes:
+        - {name: config, configMap: {name: envoy-config}}
+        - {name: credentials, secret: {secretName: inference-credentials}}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: envoy}
+spec:
+  type: NodePort
+  selector: {app: envoy}
+  ports: [{name: http, port: 8000, targetPort: 8000, nodePort: {{ environment.kubernetes.gateway_node_port }}}]

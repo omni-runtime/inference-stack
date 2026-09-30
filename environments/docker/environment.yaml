@@ -1,0 +1,43 @@
+name: docker
+runtime: docker
+platform: linux/arm64
+project: inference-stack-docker
+root: /workspace/inference-stack
+release: contracts/release.yaml
+container_only: true
+docker:
+  context: default
+  management: existing-socket-over-ssh
+  ssh: operator@docker.example.test
+  host_cli: /Applications/Docker.app/Contents/Resources/bin/docker
+  host_compose_version: 5.1.4
+  tools_compose_version: 5.5.1
+  project: inference-stack-docker
+  gateway_bind: 127.0.0.1
+  gateway_port: 18000
+  allowed_readonly_model_source: /srv/models
+  model_target: /models/minimax-h3
+  config_volume_mount: /runtime-config
+  tools_container: inference-stack-docker-tools
+  volumes:
+    source_a: inference-stack-docker-source-a
+    source_b: inference-stack-docker-source-b
+    config: inference-stack-docker-config
+    credentials: inference-stack-docker-credentials
+    cache: inference-stack-docker-cache
+    outputs: inference-stack-docker-outputs
+    reports: inference-stack-docker-reports
+    media_bindings: inference-stack-docker-media-bindings
+    management: inference-stack-docker-management
+resources:
+  router_memory: 1g
+  router_cpus: 2
+  envoy_memory: 512m
+  envoy_cpus: 2
+  mock_memory: 256m
+  mock_cpus: 1
+  model_memory: 6g
+  model_cpus: 4
+  gpu_device_ids: []
+  real_models: unverified
+  local_engines_concurrent: false

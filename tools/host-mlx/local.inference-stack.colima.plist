@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>Label</key><string>local.inference-stack.colima</string>
+<key>ProgramArguments</key><array>
+<string>/usr/bin/sudo</string><string>-iu</string><string>operator</string>
+<string>/opt/homebrew/bin/colima</string><string>start</string><string>inference-stack</string>
+<string>--kubernetes</string><string>--kubernetes-version</string><string>v1.36.4+k3s1</string>
+<string>--activate=false</string><string>--foreground</string>
+</array>
+<key>EnvironmentVariables</key><dict><key>PATH</key><string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string></dict>
+<key>RunAtLoad</key><true/>
+<key>KeepAlive</key><true/>
+<key>ThrottleInterval</key><integer>30</integer>
+<key>StandardOutPath</key><string>/opt/omni-runtime/host-mlx/logs/colima.log</string>
+<key>StandardErrorPath</key><string>/opt/omni-runtime/host-mlx/logs/colima.log</string>
+</dict></plist>
