@@ -9,7 +9,7 @@ import subprocess
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-EXCLUDED = {'.git', '.venv', '.work', '.state', 'dist', 'generated', 'reports', '__pycache__'}
+EXCLUDED = {'.git', '.venv', '.work', '.state', 'dist', 'generated', 'reports', '__pycache__', 'instances'}
 
 def public_files():
     return [p for p in ROOT.rglob('*') if p.is_file() and not EXCLUDED.intersection(p.relative_to(ROOT).parts)]
@@ -51,7 +51,13 @@ def main():
             assert hashlib.sha256((ROOT / 'patches' / name).read_bytes()).hexdigest() == checksums[name]
         assert contract['patch_set']['checksums'] == checksums
         assert contract['upstream']['commit'] == json.loads((ROOT / 'upstream.lock.json').read_text())['commit']
-    print('Public source, links, shell/Python syntax and release evidence: passed')
+    if (ROOT / 'schemas/stack.schema.json').exists():
+        from jsonschema import Draft202012Validator
+        from stack_config import StackConfig
+        Draft202012Validator.check_schema(json.loads((ROOT / 'schemas/stack.schema.json').read_text()))
+        for path in sorted((ROOT / 'examples').glob('*/stack.yaml')):
+            StackConfig(path)
+    print('Public source, links, shell/Python syntax, configuration schemas and release evidence: passed')
 
 if __name__ == '__main__':
     main()

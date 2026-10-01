@@ -28,17 +28,25 @@ cd inference-stack
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements.lock
-python scripts/deploy.py render --runtime kubernetes --environment kubernetes \
-  --example vllm-omni-cloud --overlay mock --config-only
+python scripts/deploy.py render --config examples/vllm-omni-cloud/stack.yaml --config-only
 python -m unittest discover -s tests/unit -v
 ```
 
-生成结果在 `generated/kubernetes/vllm-omni-cloud/`。
-真实部署前，按[部署指南](docs/getting-started.md)配置自己的地址、模型 ID、能力、
-凭证与 kubeconfig，并构建、导入配套 Router 镜像。
+生成结果在 `generated/sample-vllm-omni-cloud/stack/`。
+真实部署前，按[统一配置指南](docs/configuration.zh-CN.md)建立
+`instances/<name>/stack.yaml` 和 `secrets.env`，集中填写主机、模型、资源和凭据引用，
+并准备 kubeconfig 及配套 Router 镜像。
 
 **当前是 preview.10 源码预览版。** 发布契约中的镜像摘要标识已实测的本地 OCI 产物，
 尚未发布到公共镜像仓库，不能假定可以直接拉取。仓库不包含模型权重或真实凭证。
+
+## 统一配置入口
+
+日常修改一份 `stack.yaml`，私有密钥放在 `secrets.env`，运行清单统一生成。
+[混合部署示例](examples/hybrid/stack.yaml)覆盖 K8s 网关、远端文本和宿主 MLX。
+所有操作使用同一个 `--config`；check/render/plan 为离线检查与预览，
+部署和真实模型验证仍需显式执行。旧参数保留迁移兼容。
+详见[配置与迁移指南](docs/configuration.zh-CN.md)。
 
 ## 配置与验证
 

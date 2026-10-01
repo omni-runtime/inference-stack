@@ -1,0 +1,211 @@
+schema_version: 1
+name: sample-vllm-omni-cloud
+mode: mock
+hosts:
+  gateway:
+    ssh: operator@gateway.example.test
+    root: /srv/inference-stack
+gateway:
+  runtime: kubernetes
+  platform: linux/amd64
+  project: inference-stack
+  host: gateway
+  kubernetes:
+    context: default
+    kubeconfig: /srv/inference-stack/environments/kubernetes/kubeconfig
+    namespace: inference-stack
+    node: gpu-node
+    gateway_node_port: 30800
+    runtime_class: nvidia
+    model_root: /srv/models
+resources:
+  router_memory: 1Gi
+  router_cpus: 2
+  envoy_memory: 512Mi
+  envoy_cpus: 2
+  mock_memory: 256Mi
+  mock_cpus: 1
+  model_memory: 8Gi
+  model_cpus: 4
+  gpu_count: 1
+  local_engines_concurrent: false
+  reason: Single 6 GiB GPU; simultaneous real-engine capacity unverified. Never stop
+    another model automatically.
+artifacts:
+  release: ../../contracts/release.yaml
+  versions: ../../versions.lock.yml
+secrets:
+  file: secrets.env
+backends:
+  vllm:
+    pool: vllm
+    provider: vllm
+    base_url: http://vllm:8000/v1
+    api_key_env: MODEL_API_KEY
+    deployment:
+      image: vllm
+      replicas: 1
+      command:
+      - vllm
+      - serve
+      - /models/Qwen3-0.6B
+      - --served-model-name
+      - local/text
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8000'
+      - --max-model-len
+      - '2048'
+      - --gpu-memory-utilization
+      - '0.65'
+      - --enforce-eager
+      - --dtype
+      - half
+      - --max-num-seqs
+      - '1'
+      - --max-num-batched-tokens
+      - '512'
+      - --default-chat-template-kwargs
+      - '{"enable_thinking":false}'
+      mode: managed
+  omni:
+    pool: omni
+    provider: vllm-omni
+    base_url: http://omni:8000/v1
+    api_key_env: MODEL_API_KEY
+    deployment:
+      image: omni
+      replicas: 1
+      command:
+      - vllm
+      - serve
+      - /models/Qwen3-TTS-12Hz-0.6B-CustomVoice
+      - --omni
+      - --served-model-name
+      - local/speech
+      - --host
+      - 0.0.0.0
+      - --port
+      - '8000'
+      - --trust-remote-code
+      - --deploy-config
+      - /config/qwen3-tts-6g.yaml
+      config_files:
+        qwen3-tts-6g.yaml:
+          model_runner: v1
+          async_chunk: true
+          connectors:
+            connector_of_shared_memory:
+              name: SharedMemoryConnector
+              extra:
+                codec_streaming: true
+                connector_get_sleep_s: 0.01
+                connector_get_max_wait_first_chunk: 3000
+                connector_get_max_wait: 300
+                codec_chunk_frames: 25
+                codec_left_context_frames: 72
+                initial_codec_chunk_frames: 1
+                decode_batch_max_size: 1
+          stages:
+          - stage_id: 0
+            devices: '0'
+            max_num_seqs: 1
+            max_model_len: 1024
+            max_num_batched_tokens: 512
+            gpu_memory_utilization: 0.5
+            dtype: bfloat16
+            enforce_eager: true
+            trust_remote_code: true
+            enable_prefix_caching: false
+            async_scheduling: true
+            output_connectors:
+              to_stage_1: connector_of_shared_memory
+            default_sampling_params:
+              temperature: 0.9
+              top_k: 50
+              max_tokens: 512
+              min_tokens: 2
+              repetition_penalty: 1.05
+            subtalker_sampling_params:
+              do_sample: true
+              temperature: 0.9
+              top_k: 50
+              top_p: 1.0
+          - stage_id: 1
+            devices: '0'
+            dtype: bfloat16
+            max_num_seqs: 1
+            gpu_memory_utilization: 0.18
+            enforce_eager: true
+            trust_remote_code: true
+            enable_prefix_caching: false
+            async_scheduling: true
+            max_num_batched_tokens: 16384
+            max_model_len: 16384
+            input_connectors:
+              from_stage_0: connector_of_shared_memory
+            default_sampling_params:
+              temperature: 0.0
+              top_p: 1.0
+              top_k: -1
+              max_tokens: 16384
+              repetition_penalty: 1.0
+      mode: managed
+  cloud:
+    pool: cloud
+    provider: openai
+    base_url: https://api.example.com/v1
+    api_key_env: CLOUD_API_KEY
+    deployment:
+      mode: external
+models:
+- name: local/text
+  provider_model_id: local/text
+  api_format: openai
+  capabilities:
+  - text
+  context_window: 2048
+  max_output_tokens: 512
+  model_directory: Qwen3-0.6B
+  revision: c1899de289a04d12100db370d81485cdf75e47ca
+  backend: vllm
+- name: local/speech
+  provider_model_id: local/speech
+  api_format: speech
+  capabilities:
+  - text
+  - speech_generation
+  context_window: 1024
+  max_output_tokens: 512
+  model_directory: Qwen3-TTS-12Hz-0.6B-CustomVoice
+  revision: 85e237c12c027371202489a0ec509ded67b5e4b5
+  backend: omni
+- name: local/speech-stream
+  provider_model_id: local/speech
+  api_format: speech_stream
+  capabilities:
+  - text
+  - realtime
+  - speech_generation
+  - audio_output
+  context_window: 1024
+  max_output_tokens: 512
+  model_directory: Qwen3-TTS-12Hz-0.6B-CustomVoice
+  revision: 85e237c12c027371202489a0ec509ded67b5e4b5
+  backend: omni
+- name: cloud/chat
+  provider_model_id: your-cloud-model
+  api_format: openai
+  capabilities:
+  - text
+  - image_input
+  context_window: 32768
+  max_output_tokens: 2048
+  backend: cloud
+routing:
+  enabled_models:
+  - local/text
+  - local/speech
+  - local/speech-stream
+  - cloud/chat

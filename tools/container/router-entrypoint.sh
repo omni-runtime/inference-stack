@@ -1,10 +1,11 @@
 #!/bin/sh
 set -eu
 # Runtime credential injection only; this process does not handle requests.
-for name in MODEL_API_KEY CLOUD_API_KEY; do
-  if [ -f "/run/secrets/$name" ]; then
-    value=$(cat "/run/secrets/$name")
-    export "$name=$value"
-  fi
+for file in /run/secrets/*_API_KEY; do
+  [ -f "$file" ] || continue
+  name=${file##*/}
+  case "$name" in *[!A-Z0-9_]*) exit 2;; esac
+  value=$(cat "$file")
+  export "$name=$value"
 done
 exec /app/router-candle "$@"

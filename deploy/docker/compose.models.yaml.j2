@@ -33,7 +33,7 @@ services:{{ ' {}' if not backend_services else '' }}
         read_only: true
         bind: {create_host_path: false}
 {% endif %}
-    environment: {HF_HOME: /cache/huggingface}
+    environment: {HF_HOME: /cache/huggingface, MODEL_KEY_NAME: {{ backend_key_env[service] }}}
     networks: [inference]
     restart: unless-stopped
     cap_drop: [ALL]

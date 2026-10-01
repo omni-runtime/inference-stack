@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Add one schema-validated `stack.yaml` input for deployment, credentials, tests
+  and explicit MLX host tooling; keep legacy CLI compatibility and a migration command.
+- Separate shared backend settings from model capabilities and enable independent backend keys.
+- Add offline change plans, successful-deployment snapshots and complete generated-file replacement.
+- Add nine portable stack examples, release-contract import, configuration guides
+  and migration/equivalence tests. No new GPU or real-model acceptance is claimed.
+
+
 ## 0.1.0-preview.10 — initial public source publication
 
 - Native MLX-Serve H3 video task, codec, capability filtering, and dispatch.

@@ -30,3 +30,9 @@ jobs:
             python scripts/deploy.py render --runtime kubernetes --environment kubernetes --example "$scenario" --overlay mock --config-only
           done
           python scripts/deploy.py render --runtime kubernetes --environment hybrid --example vllm-omni-cloud --catalog environments/hybrid/catalog.yaml --overlay mock --config-only
+      - name: Validate and preview every unified stack without a runtime
+        run: |
+          for config in examples/*/stack.yaml; do
+            python scripts/deploy.py check --config "$config" --config-only
+            python scripts/deploy.py plan --config "$config"
+          done

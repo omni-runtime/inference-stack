@@ -1,9 +1,10 @@
 #!/bin/sh
 set -eu
-for key in MODEL_API_KEY CLOUD_API_KEY; do
-  if [ -f "/run/secrets/$key" ]; then
-    value=$(cat "/run/secrets/$key")
-    export "$key=$value"
-  fi
+for file in /run/secrets/*_API_KEY; do
+  [ -f "$file" ] || continue
+  key=${file##*/}
+  case "$key" in *[!A-Z0-9_]*) exit 2;; esac
+  value=$(cat "$file")
+  export "$key=$value"
 done
 exec "$@"

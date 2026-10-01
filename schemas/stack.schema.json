@@ -1,0 +1,592 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{0,47}$"
+    },
+    "mode": {
+      "enum": [
+        "real",
+        "mock"
+      ]
+    },
+    "hosts": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]{0,47}$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "ssh": {
+            "type": "string",
+            "minLength": 1
+          },
+          "root": {
+            "type": "string",
+            "minLength": 1
+          },
+          "platform": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "ssh",
+          "root"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "gateway": {
+      "type": "object",
+      "properties": {
+        "runtime": {
+          "enum": [
+            "kubernetes",
+            "docker"
+          ]
+        },
+        "platform": {
+          "enum": [
+            "linux/amd64",
+            "linux/arm64"
+          ]
+        },
+        "project": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "host": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,47}$"
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "container_only": {
+          "type": "boolean"
+        },
+        "verification_not_before": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kubernetes": {
+          "type": "object",
+          "properties": {
+            "context": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kubeconfig": {
+              "type": "string",
+              "minLength": 1
+            },
+            "namespace": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,47}$"
+            },
+            "node": {
+              "type": "string",
+              "minLength": 1
+            },
+            "gateway_node_port": {
+              "type": "integer",
+              "minimum": 30000,
+              "maximum": 32767
+            },
+            "runtime_class": {
+              "type": "string",
+              "minLength": 1
+            },
+            "model_root": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "context",
+            "kubeconfig",
+            "namespace",
+            "node",
+            "gateway_node_port"
+          ],
+          "additionalProperties": false
+        },
+        "docker": {
+          "type": "object",
+          "properties": {
+            "context": {
+              "type": "string",
+              "minLength": 1
+            },
+            "management": {
+              "type": "string",
+              "minLength": 1
+            },
+            "host_cli": {
+              "type": "string",
+              "minLength": 1
+            },
+            "host_compose_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tools_compose_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "gateway_bind": {
+              "type": "string",
+              "minLength": 1
+            },
+            "allowed_readonly_model_source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "model_target": {
+              "type": "string",
+              "minLength": 1
+            },
+            "config_volume_mount": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tools_container": {
+              "type": "string",
+              "minLength": 1
+            },
+            "gateway_port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535
+            },
+            "volumes": {
+              "type": "object",
+              "properties": {
+                "source_a": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_b": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "config": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "credentials": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "cache": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "outputs": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reports": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "media_bindings": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "management": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "config",
+                "credentials",
+                "cache",
+                "outputs",
+                "media_bindings"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "context",
+            "gateway_bind",
+            "gateway_port",
+            "allowed_readonly_model_source",
+            "model_target",
+            "config_volume_mount",
+            "tools_container",
+            "volumes"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "runtime",
+        "platform",
+        "project",
+        "host"
+      ],
+      "additionalProperties": false
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "router_memory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "envoy_memory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mock_memory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model_memory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "router_cpus": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "envoy_cpus": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "mock_cpus": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "model_cpus": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "gpu_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gpu_device_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "real_models": {
+          "enum": [
+            "verified",
+            "unverified"
+          ]
+        },
+        "local_engines_concurrent": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "router_memory"
+      ],
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "release": {
+          "type": "string",
+          "minLength": 1
+        },
+        "versions": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "release",
+        "versions"
+      ],
+      "additionalProperties": false
+    },
+    "secrets": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "file"
+      ],
+      "additionalProperties": false
+    },
+    "backends": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]{0,47}$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "pool": {
+            "enum": [
+              "vllm",
+              "omni",
+              "cloud"
+            ]
+          },
+          "provider": {
+            "type": "string",
+            "minLength": 1
+          },
+          "base_url": {
+            "type": "string",
+            "minLength": 1
+          },
+          "api_key_env": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*_API_KEY$"
+          },
+          "host": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,47}$"
+          },
+          "deployment": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "enum": [
+                  "managed",
+                  "external"
+                ]
+              },
+              "image": {
+                "type": "string",
+                "minLength": 1
+              },
+              "replicas": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "command": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              },
+              "node_port": {
+                "type": "integer",
+                "minimum": 30000,
+                "maximum": 32767
+              },
+              "config_files": {
+                "type": "object",
+                "propertyNames": {
+                  "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]*$"
+                },
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            },
+            "required": [
+              "mode"
+            ],
+            "additionalProperties": false
+          },
+          "mlx": {
+            "type": "object",
+            "properties": {
+              "home": {
+                "type": "string",
+                "minLength": 1
+              },
+              "listen": {
+                "type": "string",
+                "minLength": 1
+              },
+              "port": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "max_concurrent": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "timeout": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "model_directory": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+              },
+              "python": {
+                "type": "string",
+                "minLength": 1
+              },
+              "model_manifest": {
+                "type": "string",
+                "minLength": 1
+              },
+              "engine_lock": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "home",
+              "model_directory",
+              "model_manifest",
+              "engine_lock"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "pool",
+          "provider",
+          "base_url",
+          "api_key_env",
+          "deployment"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "backend": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,47}$"
+          },
+          "provider_model_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "api_format": {
+            "enum": [
+              "openai",
+              "speech",
+              "images",
+              "audio_generate",
+              "transcription",
+              "translation",
+              "image_edit",
+              "video_sync",
+              "video",
+              "realtime",
+              "speech_stream",
+              "mlx_video"
+            ]
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "context_window": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "request_timeout_seconds": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "model_directory": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 1
+          },
+          "stateful_instance": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name",
+          "backend",
+          "provider_model_id",
+          "api_format",
+          "capabilities",
+          "context_window",
+          "max_output_tokens"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "routing": {
+      "type": "object",
+      "properties": {
+        "enabled_models": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "enabled_models"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "name",
+    "mode",
+    "hosts",
+    "gateway",
+    "resources",
+    "artifacts",
+    "secrets",
+    "backends",
+    "models",
+    "routing"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Inference stack deployment configuration v1",
+  "description": "User-maintained deployment input. Paths are relative to this file except absolute remote host paths. Secrets are references only."
+}

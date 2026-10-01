@@ -5,17 +5,27 @@ import base64
 import hashlib
 import json
 from pathlib import Path
-from run import Run, ROOT
+from run import Run, ROOT, StackConfig
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--environment',default='hybrid')
-    parser.add_argument('--runtime',default='kubernetes',choices=['kubernetes'])
-    parser.add_argument('--example',default='vllm-omni-cloud')
-    parser.add_argument('--catalog',default='environments/hybrid/catalog.yaml')
+    parser.add_argument('--config',type=Path)
+    parser.add_argument('--environment')
+    parser.add_argument('--runtime',choices=['kubernetes'])
+    parser.add_argument('--example')
+    parser.add_argument('--catalog')
     parser.add_argument('--url')
-    args=parser.parse_args();args.overlay='real'
+    args=parser.parse_args()
+    args.overlay=None
+    if not args.config:
+        args.environment=args.environment or 'hybrid'
+        args.runtime=args.runtime or 'kubernetes'
+        args.example=args.example or 'vllm-omni-cloud'
+        args.catalog=args.catalog or 'environments/hybrid/catalog.yaml'
+        args.overlay='real'
+    elif StackConfig(args.config).mock:
+        parser.error('real H3 test requires mode: real')
     run=Run(args);run.wait_gateway()
     path='/v1/video/generations'
     request={'model':'local-only','prompt':'A small red ball rolls across a wooden table. Soft rolling sound. Static camera.',

@@ -15,3 +15,6 @@ reports/
 *.safetensors
 
 contracts/release.local.yaml
+instances/*
+!instances/README.md
+locks/*.local.yaml

@@ -6,6 +6,9 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
+import plistlib
+import shutil
 from urllib.parse import urlsplit
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
@@ -13,6 +16,7 @@ import yaml
 
 from boundary import BoundaryError, enforce_execution, validate_compose
 from envoy import render as render_envoy
+from stack_config import StackConfig, reject_mixed_args
 
 ROOT = Path(__file__).resolve().parents[1]
 LABEL = "app.kubernetes.io/part-of=inference-stack"
@@ -37,26 +41,39 @@ def execute(command, *, capture=False, timeout=1000):
 class Stack:
     def __init__(self, args):
         self.args = args
-        self.environment = read_yaml(ROOT / "environments" / args.environment / "environment.yaml")
-        if self.environment.get("name") != args.environment:
-            raise ValueError("environment name must match its selected directory")
-        if self.environment["runtime"] != args.runtime:
-            raise ValueError("environment/runtime mismatch")
-        enforce_execution(self.environment)
+        self.config = None
+        if getattr(args, "config", None):
+            reject_mixed_args(args)
+            self.config = StackConfig(args.config)
+            self.environment = self.config.environment
+            args.environment = self.config.name
+            args.runtime = self.environment['runtime']
+        else:
+            self.environment = read_yaml(ROOT / "environments" / args.environment / "environment.yaml")
+            if self.environment.get("name") != args.environment:
+                raise ValueError("environment name must match its selected directory")
+            if self.environment["runtime"] != args.runtime:
+                raise ValueError("environment/runtime mismatch")
+        # Unified offline commands do not access Docker or stage its live volume.
+        if not self.config or args.action not in {'check', 'render', 'plan'}:
+            enforce_execution(self.environment)
         self.state_dir = ROOT / ".state" / args.environment / args.runtime
-        self.state_dir.mkdir(parents=True, exist_ok=True)
         self.state_file = self.state_dir / "inventory.json"
         self.state = json.loads(self.state_file.read_text()) if self.state_file.exists() else {
             "resources": [], "stopped": [], "status": "new"}
-        self.example = args.example or self.state.get("example")
+        if not self.config and self.state.get('config_path'):
+            raise ValueError('this instance now uses unified configuration; pass --config with its stack.yaml')
+        self.example = 'stack' if self.config else args.example or self.state.get("example")
         if not self.example and args.action not in {"status", "logs"}:
             raise ValueError("--example is required before the first deployment")
         self.output = ROOT / "generated" / args.environment / (self.example or "status")
         self.runtime = args.runtime
-        self.mock = args.overlay == "mock" or (not args.example and self.state.get("overlay") == "mock")
-        self.images = read_yaml(ROOT / "versions.lock.yml")["images"]
-        self.release_path = Path(args.release) if args.release else ROOT / self.environment["release"]
-        self.release = read_yaml(self.release_path)
+        self.mock = self.config.mock if self.config else (args.overlay == "mock" or (not args.example and self.state.get("overlay") == "mock"))
+        self.images = dict(self.config.images) if self.config else read_yaml(ROOT / "versions.lock.yml")["images"]
+        self.release_path = self.config.release_path if self.config else (Path(args.release) if args.release else ROOT / self.environment["release"])
+        self.release = self.config.release if self.config else read_yaml(self.release_path)
+        if self.config and self.state.get('target') and self.state['target'] != self.config.target():
+            raise ValueError('deployment target changed for this instance; use a different name for a different target')
         # Even status/stop/down render the Compose file to address its services.
         # Select the target artifact consistently; acceptance is checked before
         # any deploy/start or ordinary render, while cleanup remains available.
@@ -66,17 +83,22 @@ class Stack:
         self.renderer = Environment(loader=FileSystemLoader(ROOT), undefined=StrictUndefined,
                                     autoescape=False, trim_blocks=True, lstrip_blocks=True)
         if self.example:
-            self.pools = read_yaml(ROOT / "examples" / self.example / "example.yaml")["pools"]
-            if not self.pools or set(self.pools) - {"vllm", "omni", "cloud"}:
-                raise ValueError("zero or unknown backend pools")
-            catalog_name = args.catalog or (self.state.get("catalog") if not args.example else None) or "config/models/catalog.yaml"
-            self.catalog_path = (ROOT / catalog_name).resolve()
-            if not self.catalog_path.is_relative_to(ROOT):
-                raise ValueError("--catalog must be inside the project for repeatable remote deployment")
-            catalog_document = read_yaml(self.catalog_path)
-            if catalog_document.get("mock_only") and not self.mock:
-                raise ValueError("this catalog contains mock models and requires --overlay mock")
-            catalog = catalog_document["models"]
+            if self.config:
+                self.pools = self.config.pools
+                self.catalog_path = None
+                catalog = self.config.models
+            else:
+                self.pools = read_yaml(ROOT / "examples" / self.example / "example.yaml")["pools"]
+                if not self.pools or set(self.pools) - {"vllm", "omni", "cloud"}:
+                    raise ValueError("zero or unknown backend pools")
+                catalog_name = args.catalog or (self.state.get("catalog") if not args.example else None) or "config/models/catalog.yaml"
+                self.catalog_path = (ROOT / catalog_name).resolve()
+                if not self.catalog_path.is_relative_to(ROOT):
+                    raise ValueError("--catalog must be inside the project for repeatable remote deployment")
+                catalog_document = read_yaml(self.catalog_path)
+                if catalog_document.get("mock_only") and not self.mock:
+                    raise ValueError("this catalog contains mock models and requires --overlay mock")
+                catalog = catalog_document["models"]
             self.models = [m for m in catalog if m["pool"] in self.pools]
             if not self.models:
                 raise ValueError("no configured models in the requested pools")
@@ -174,6 +196,7 @@ class Stack:
                             raise ValueError(f"gateway port {env['gateway_bind']}:{env['gateway_port']} is already published by another container; no resource changed")
 
     def save(self):
+        self.state_dir.mkdir(parents=True, exist_ok=True)
         temp = self.state_file.with_suffix(".tmp")
         temp.write_text(json.dumps(self.state, indent=2) + "\n")
         temp.replace(self.state_file)
@@ -240,6 +263,13 @@ class Stack:
                 raise ValueError("existing read-only weights have not passed model/format/engine compatibility audit")
 
     def check_credentials(self):
+        if getattr(self, 'config', None):
+            values = self.config.credentials()
+            private = ROOT / 'secrets' / self.args.environment
+            stale = [k for k, v in values.items() if not (private / k).is_file() or (private / k).read_text().strip() != v]
+            if stale:
+                raise ValueError('credential material is missing or stale; run scripts/credentials.py --config with the same stack file')
+            return
         required = {"GATEWAY_TOKEN"}
         if not self.mock:
             required.update(m["api_key_env"] for m in self.models)
@@ -250,7 +280,35 @@ class Stack:
         if missing:
             raise ValueError("missing non-empty credential files: " + ", ".join(missing) + "; run scripts/credentials.py with an explicit private source")
 
-    def render(self):
+    def render(self, *, stage=True):
+        output = self.output
+        output.parent.mkdir(parents=True, exist_ok=True)
+        if output.is_symlink():
+            raise ValueError('generated output directory must not be a symlink')
+        # Build a complete generation first. Failed validation leaves the previous
+        # files intact, and switching enabled models cannot retain stale fragments.
+        with tempfile.TemporaryDirectory(prefix='.render-', dir=output.parent) as directory:
+            self.output = Path(directory)
+            try:
+                self._render(stage=stage)
+                backup = None
+                if output.exists():
+                    backup = Path(tempfile.mkdtemp(prefix='.previous-', dir=output.parent))
+                    backup.rmdir()
+                    output.rename(backup)
+                try:
+                    self.output.rename(output)
+                except OSError:
+                    if backup:
+                        backup.rename(output)
+                    raise
+                if backup:
+                    shutil.rmtree(backup)
+            finally:
+                self.output = output
+        return output
+
+    def _render(self, *, stage=True):
         self.output.mkdir(parents=True, exist_ok=True)
         scopes = {}
         for scope, pools in [("local-only", {"vllm", "omni"}), ("cloud-only", {"cloud"})]:
@@ -275,7 +333,7 @@ class Stack:
             material += credential_revision.read_bytes()
         if self.mock:
             material += (ROOT / "tests/overlays/mock/mock_backend.py").read_bytes()
-        model_files = {}
+        model_files = dict(self.config.inline_files) if self.config else {}
         for deployment in self.backends.values():
             for filename, source in deployment.get("config_files", {}).items():
                 path = (ROOT / source).resolve()
@@ -310,7 +368,8 @@ class Stack:
             complete["name"] = self.environment["project"]
             complete["services"].update(fragments["compose.models.yaml"]["services"] or {})
             validate_compose(complete, self.environment)
-            self.stage_compose_config(common["config_sha"], model_files)
+            if stage:
+                self.stage_compose_config(common["config_sha"], model_files)
         else:
             resources = []
             for category in ["router", "envoy", "models"]:
@@ -343,10 +402,74 @@ class Stack:
                     {"name":"envoy-config", "files":["envoy.yaml"]},
                     {"name":"backend-config", "files":["mock_backend.py", *sorted(model_files)]}],
             })
+        if self.config:
+            write_yaml(self.output / 'resolved.yaml', self.config.document)
+            for service, backend in self.config.document['backends'].items():
+                if self.mock or 'mlx' not in backend or service not in {m['service'] for m in self.models}:
+                    continue
+                directory = self.output / 'host-mlx' / service
+                directory.mkdir(parents=True, exist_ok=True)
+                settings = self.config.mlx_settings(service)
+                (directory / 'settings.json').write_text(json.dumps(settings, indent=2) + '\n')
+                mlx = backend['mlx']
+                host_root = Path(self.config.document['hosts'][backend['host']]['root'])
+                plist = {'Label': 'local.inference-stack.' + self.config.name + '.' + service,
+                         'ProgramArguments': [mlx.get('python','/usr/bin/python3'), str(host_root / 'tools/host-mlx/serve.py'),
+                                              '--settings', str(Path(mlx['home']) / 'settings.json')],
+                         'WorkingDirectory': mlx['home'], 'RunAtLoad': True, 'KeepAlive': True, 'ThrottleInterval': 30,
+                         'StandardOutPath': str(Path(mlx['home']) / 'logs/server.log'),
+                         'StandardErrorPath': str(Path(mlx['home']) / 'logs/server.log')}
+                (directory / 'service.plist').write_bytes(plistlib.dumps(plist))
         self.state["config_sha"] = common["config_sha"]
         return self.output
 
+    def snapshot(self):
+        files = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in self.output.iterdir()
+                 if p.is_file() and p.name != 'resolved.yaml'}
+        external = sorted({m['service'] for m in self.models if m['service'] not in self.backends})
+        host_files = {str(p.relative_to(self.output)): hashlib.sha256(p.read_bytes()).hexdigest()
+                      for p in (self.output / 'host-mlx').rglob('*') if p.is_file()}
+        return {'services': sorted(self.enabled_services), 'files': files, 'external': external,
+                'host_files': host_files, 'stopped': sorted(self.state['stopped'])}
+
+    def plan(self):
+        if not self.config:
+            raise ValueError('plan requires --config')
+        # Render elsewhere: inspecting a plan cannot replace the active Compose files.
+        previous_output = self.output
+        try:
+            with tempfile.TemporaryDirectory(prefix='inference-plan-') as directory:
+                self.output = Path(directory)
+                self.render(stage=False)
+                desired = self.snapshot()
+        finally:
+            self.output = previous_output
+        baseline = self.state.get('applied_snapshot')
+        before = set(baseline['services']) if baseline else set()
+        after = set(desired['services'])
+        changed = baseline is not None and baseline['files'] != desired['files']
+        result = {'basis': 'last successful local deployment; live cluster drift not inspected',
+                  'baseline_available': baseline is not None,
+                  'create': sorted(after - before), 'remove': sorted(before - after),
+                  'update_may_restart': sorted(before & after) if changed else [],
+                  'remain_stopped': sorted(after & set(self.state['stopped'])),
+                  'external_not_managed': desired['external'],
+                  'host_configuration_changed': (baseline or {}).get('host_files', {}) != desired['host_files'],
+                  'host_configuration_action': 'explicit host installation/restart required; gateway deploy does not apply it',
+                  'credential_values': 'omitted; run credentials separately after changing secrets'}
+        if baseline is None:
+            result['note'] = 'No baseline: listed creates are desired resources, not a claim that the target is empty.'
+        print(json.dumps(result, indent=2))
+
     def check(self):
+        if self.config:
+            if not self.args.config_only:
+                self.check_contract()
+                self.check_resources()
+                self.config.credentials()
+            self.render(stage=False)
+            print('Unified configuration and generated files: valid (offline; no cluster or engine calls)')
+            return
         if not self.args.config_only:
             self.check_contract()
             self.check_resources()
@@ -367,7 +490,10 @@ class Stack:
             self.check_docker_target()
         self.render()
         self.state.update(example=self.example, overlay="mock" if self.mock else "real", status="applying",
-                          catalog=str(self.catalog_path.relative_to(ROOT)))
+                          catalog=str(self.catalog_path.relative_to(ROOT)) if self.catalog_path else None)
+        if self.config:
+            self.state.update(target=self.config.target(), config_path=str(self.config.path),
+                              config_fingerprint=self.config.fingerprint())
         self.save()
         try:
             if self.runtime == "kubernetes":
@@ -399,16 +525,20 @@ class Stack:
             self.state["status"] = "apply-failed-rerun-same-deploy-to-reconcile"
             self.save()
             raise
+        if self.config:
+            self.state['applied_snapshot'] = self.snapshot()
         self.state["status"] = "ready-for-end-to-end-test"
         self.save()
 
     def operate(self):
         action = self.args.action
+        if action == "plan":
+            self.plan(); return
         if action == "render":
             if not self.args.config_only:
                 self.check_contract()
                 self.check_resources()
-            print(self.render()); return
+            print(self.render(stage=not bool(self.config))); return
         if action == "check":
             self.check(); return
         if action == "deploy":
@@ -460,19 +590,23 @@ class Stack:
         if action == "test":
             if self.runtime == "docker":
                 self.tools_network(True)
-            execute([sys.executable, ROOT / ("tests/integration/run.py" if self.mock else "tests/integration/real.py"), "--environment", self.args.environment,
-                     "--runtime", self.runtime, "--example", self.example,
-                     "--overlay", "mock" if self.mock else "real",
-                     "--catalog", str(self.catalog_path.relative_to(ROOT))]); return
+            command = [sys.executable, ROOT / ("tests/integration/run.py" if self.mock else "tests/integration/real.py")]
+            if self.config:
+                command += ['--config', str(self.config.path)]
+            else:
+                command += ["--environment", self.args.environment, "--runtime", self.runtime, "--example", self.example,
+                            "--overlay", "mock" if self.mock else "real", "--catalog", str(self.catalog_path.relative_to(ROOT))]
+            execute(command); return
         raise ValueError("unknown action")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["check","render","deploy","start","stop","status","logs","test","down"])
-    parser.add_argument("--runtime", required=True, choices=["kubernetes","docker"])
-    parser.add_argument("--environment", required=True, choices=sorted(p.name for p in (ROOT / "environments").iterdir() if (p / "environment.yaml").is_file()))
-    parser.add_argument("--example", choices=sorted(p.name for p in (ROOT / "examples").iterdir()))
+    parser.add_argument("action", choices=["check","plan","render","deploy","start","stop","status","logs","test","down"])
+    parser.add_argument("--config", type=Path, help="single stack.yaml deployment configuration")
+    parser.add_argument("--runtime", choices=["kubernetes","docker"])
+    parser.add_argument("--environment", choices=sorted(p.name for p in (ROOT / "environments").iterdir() if (p / "environment.yaml").is_file()))
+    parser.add_argument("--example", choices=sorted(p.name for p in (ROOT / "examples").iterdir() if (p / "example.yaml").is_file()))
     parser.add_argument("--overlay", choices=["mock"])
     parser.add_argument("--service")
     parser.add_argument("--release")
@@ -481,6 +615,8 @@ def main():
     parser.add_argument("--config-only", action="store_true", help="validate deployment files without claiming deployable release")
     args = parser.parse_args()
     try:
+        if not args.config and (not args.runtime or not args.environment):
+            raise ValueError('provide --config, or both legacy --runtime and --environment')
         Stack(args).operate()
     except (ValueError, BoundaryError, FileNotFoundError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
         print(f"inference-stack: {error}", file=sys.stderr)

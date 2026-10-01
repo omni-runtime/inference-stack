@@ -1,5 +1,10 @@
 # Native macOS MLX-Serve with a Kubernetes gateway
 
+For new deployments, configure `backends.mlx-h3.mlx` in one
+[`stack.yaml`](../examples/hybrid/stack.yaml). The shared loader drives download,
+launch and generated launchd settings; see [unified MLX setup](configuration.md#mlx-host-settings).
+The no-argument launcher and static plist templates below remain migration compatibility.
+
 The hybrid profile keeps Envoy and SR in a Linux ARM64 VM while H3 runs natively
 on macOS Metal. An independent NVIDIA host serves text. This avoids trying to
 expose Metal as a Linux container GPU.

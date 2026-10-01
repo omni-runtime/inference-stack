@@ -29,7 +29,7 @@ spec:
           env:
             - {name: HF_HOME, value: /cache/huggingface}
             - name: VLLM_API_KEY
-              valueFrom: {secretKeyRef: {name: inference-credentials, key: MODEL_API_KEY}}
+              valueFrom: {secretKeyRef: {name: inference-credentials, key: {{ backend_key_env[service] }}}}
           readinessProbe: {httpGet: {path: /health, port: 8000}, periodSeconds: 5}
           startupProbe: {httpGet: {path: /health, port: 8000}, periodSeconds: 10, failureThreshold: 90}
           resources:

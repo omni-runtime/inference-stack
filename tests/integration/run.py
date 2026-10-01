@@ -27,20 +27,35 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 from boundary import enforce_execution
+from stack_config import StackConfig, reject_mixed_args
 
 
 class Run:
     def __init__(self, args):
         self.args = args
-        self.environment = yaml.safe_load((ROOT / "environments" / args.environment / "environment.yaml").read_text())
-        if self.environment["runtime"] != args.runtime:
-            raise ValueError("environment/runtime mismatch")
+        self.config = None
+        if getattr(args, 'config', None):
+            reject_mixed_args(args)
+            self.config = StackConfig(args.config)
+            self.environment = self.config.environment
+            args.environment = self.config.name
+            args.runtime = self.environment['runtime']
+            args.example = 'stack'
+            args.overlay = 'mock' if self.config.mock else 'real'
+            self.pools = self.config.pools
+            self.models = self.config.models
+        else:
+            if not args.environment or not args.runtime or not args.example or not args.overlay:
+                raise ValueError('provide --config or all legacy environment/runtime/example/overlay arguments')
+            self.environment = yaml.safe_load((ROOT / "environments" / args.environment / "environment.yaml").read_text())
+            if self.environment["runtime"] != args.runtime:
+                raise ValueError("environment/runtime mismatch")
+            self.pools = yaml.safe_load((ROOT / "examples" / args.example / "example.yaml").read_text())["pools"]
+            catalog = yaml.safe_load((ROOT / (args.catalog or 'config/models/catalog.yaml')).read_text())
+            if catalog.get("mock_only") and args.overlay != "mock":
+                raise ValueError("mock model catalog requires explicit mock overlay")
+            self.models = [m for m in catalog["models"] if m["pool"] in self.pools]
         enforce_execution(self.environment)
-        self.pools = yaml.safe_load((ROOT / "examples" / args.example / "example.yaml").read_text())["pools"]
-        catalog = yaml.safe_load((ROOT / args.catalog).read_text())
-        if catalog.get("mock_only") and args.overlay != "mock":
-            raise ValueError("mock model catalog requires explicit mock overlay")
-        self.models = [m for m in catalog["models"] if m["pool"] in self.pools]
         self.backend_services = sorted({m["service"] for m in self.models if args.overlay == "mock" or (m["pool"] != "cloud" and m.get("deployment", {}).get("mode") != "external")})
         self.records = []
         self.readiness = []
@@ -54,7 +69,11 @@ class Run:
             self.command = ["docker", "--context", d["context"], "compose", "-p", d["project"], "-f",
                             str(ROOT / "generated" / args.environment / args.example / "compose.yaml")]
             self.url = args.url or "http://envoy:8000"
-        self.token = (ROOT / "secrets" / args.environment / "GATEWAY_TOKEN").read_text().strip()
+        if self.config:
+            self.url = args.url or self.config.document['gateway'].get('url') or self.url
+            self.token = self.config.credentials()['GATEWAY_TOKEN']
+        else:
+            self.token = (ROOT / "secrets" / args.environment / "GATEWAY_TOKEN").read_text().strip()
         stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
         self.output = ROOT / "reports" / args.environment / args.runtime / (stamp + "-" + args.example)
         self.output.mkdir(parents=True, exist_ok=False)
@@ -472,6 +491,8 @@ class Run:
         return report["failed"]
 
     def execute(self):
+        if self.args.overlay != 'mock':
+            raise ValueError('mock test runner requires mode: mock')
         self.wait_gateway()
         # Kubernetes readiness precedes node dataplane endpoint propagation.
         # Health probes are not inference and do not invoke model routing.
@@ -649,10 +670,11 @@ class Run:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--environment", required=True)
-    parser.add_argument("--runtime", choices=["kubernetes","docker"], required=True)
-    parser.add_argument("--example", required=True)
-    parser.add_argument("--overlay", choices=["mock"], required=True)
+    parser.add_argument("--config", type=Path)
+    parser.add_argument("--environment")
+    parser.add_argument("--runtime", choices=["kubernetes","docker"])
+    parser.add_argument("--example")
+    parser.add_argument("--overlay", choices=["mock"])
     parser.add_argument("--url")
-    parser.add_argument("--catalog", default="config/models/catalog.yaml")
+    parser.add_argument("--catalog")
     raise SystemExit(1 if Run(parser.parse_args()).execute() else 0)

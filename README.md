@@ -57,13 +57,13 @@ cd inference-stack
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements.lock
-python scripts/deploy.py render --runtime kubernetes --environment kubernetes \
-  --example vllm-omni-cloud --overlay mock --config-only
+python scripts/deploy.py render --config examples/vllm-omni-cloud/stack.yaml --config-only
 python -m unittest discover -s tests/unit -v
 ```
 
-Inspect `generated/kubernetes/vllm-omni-cloud/`. To deploy, configure your own
-kubeconfig, hosts, credentials and model catalog, and build/load a router image.
+Inspect `generated/sample-vllm-omni-cloud/stack/`. To deploy, configure your own
+kubeconfig and `stack.yaml` with hosts, backends and models, supply `secrets.env`,
+and build/load a router image.
 Follow the [deployment guide](docs/getting-started.md); the render command does
 not establish deployment readiness.
 
@@ -71,6 +71,16 @@ not establish deployment readiness.
 > describe locally built acceptance artifacts. They have **not** been published
 > to a public image registry. Build/import an image using the companion project
 > before running a gateway. No model weights or credentials are included.
+
+## One deployment configuration
+
+Maintain `instances/<name>/stack.yaml` and its referenced `secrets.env`.
+The configuration declares hosts, gateway, backends, models and enabled routes.
+All native runtime files are generated; project B supplies the pinned release
+contract. Start with the [hybrid stack](examples/hybrid/stack.yaml) or one of the
+seven pool examples. See [configuration and migration](docs/configuration.md).
+`check`, `render` and `plan` with `--config` are offline; deployment and real
+acceptance remain explicit operations. Legacy arguments remain compatible.
 
 ## Environments and protocols
 
@@ -98,6 +108,7 @@ claims that every model, resolution or hardware combination works.
 
 ## Documentation
 
+- [Unified configuration and migration](docs/configuration.md)
 - [Getting started and credential setup](docs/getting-started.md)
 - [Architecture and ownership](docs/architecture.md)
 - [Docker tools-container workflow](docs/docker.md)

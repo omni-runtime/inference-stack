@@ -28,3 +28,12 @@ concepts; an engine name does not imply support for every media task.
 - WebSocket selection occurs at the native handshake, not for every frame.
 
 See the detailed [request design](design.md) and [protocol limits](protocols.md).
+
+## Configuration ownership
+
+`stack.yaml` is project A's single deployment input. Its schema and loader validate
+references before generating router, Envoy, Kubernetes/Compose and explicit MLX
+host settings. Credentials remain in a separately referenced dotenv file. Build
+locks and project B's release contract are immutable artifact metadata, not a
+second set of host/model settings. Inventory records stop intent without overriding
+the selected input. See [configuration](configuration.md).

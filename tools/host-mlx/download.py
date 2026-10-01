@@ -6,17 +6,31 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import sys
 import time
 from urllib.parse import quote
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--directory', type=Path, default=Path('/opt/omni-runtime/host-mlx/models/MiniMax-H3-FL2VA-4bit'))
+    parser.add_argument('--config', type=Path)
+    parser.add_argument('--backend')
+    parser.add_argument('--directory', type=Path)
     parser.add_argument('--endpoint', choices=['https://huggingface.co', 'https://hf-mirror.com'], default='https://huggingface.co')
     args = parser.parse_args()
-    manifest = json.loads(Path(__file__).with_name('model-manifest.json').read_text())
-    root = args.directory.resolve()
+    if args.config:
+        if args.directory or not args.backend:
+            parser.error('--config requires --backend and cannot be combined with --directory')
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'scripts'))
+        from stack_config import StackConfig
+        config = StackConfig(args.config)
+        settings = config.mlx_settings(args.backend)
+        mlx = config.document['backends'][args.backend]['mlx']
+        manifest = json.loads(config.resolve(mlx['model_manifest']).read_text())
+        root = Path(settings['model'])
+    else:
+        manifest = json.loads(Path(__file__).with_name('model-manifest.json').read_text())
+        root = (args.directory or Path('/opt/omni-runtime/host-mlx/models/MiniMax-H3-FL2VA-4bit')).resolve()
     root.mkdir(parents=True, exist_ok=True)
 
     def download(item):

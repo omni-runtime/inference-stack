@@ -14,6 +14,7 @@ import subprocess
 
 import yaml
 from boundary import enforce_execution
+from stack_config import StackConfig, reject_mixed_args
 
 ROOT = Path(__file__).resolve().parents[1]
 KEYS = ("GATEWAY_TOKEN", "MODEL_API_KEY", "CLOUD_API_KEY")
@@ -31,6 +32,8 @@ def read_dotenv(path):
 
 
 def initialize(args):
+    if getattr(args, 'config', None):
+        return initialize_config(args)
     env = yaml.safe_load((ROOT / "environments" / args.environment / "environment.yaml").read_text())
     if env.get("name") != args.environment:
         raise ValueError("environment name must match its selected directory")
@@ -63,22 +66,61 @@ def initialize(args):
         revision.parent.mkdir(parents=True, exist_ok=True)
         revision.write_text(secrets.token_hex(16) + "\n")
     if args.runtime == "kubernetes":
-        k8s = env["kubernetes"]
-        command = ["kubectl", "--kubeconfig", k8s["kubeconfig"], "--context", k8s["context"],
-                   "--namespace", k8s["namespace"], "apply", "-f", "-"]
-        namespace = {"apiVersion":"v1", "kind":"Namespace", "metadata":{
-            "name":k8s["namespace"], "labels":{"app.kubernetes.io/part-of":"inference-stack"}}}
-        secret = {"apiVersion":"v1", "kind":"Secret", "metadata":{"name":"inference-credentials",
-            "namespace":k8s["namespace"], "labels":{"app.kubernetes.io/part-of":"inference-stack"}},
-            "type":"Opaque", "stringData":values}
-        for document in [namespace, secret]:
-            subprocess.run(command, input=json.dumps(document), text=True, check=True, timeout=60)
+        apply_kubernetes(env, values)
     print(f"Credential references initialized for {args.environment}/{args.runtime}; values omitted")
+
+
+def apply_kubernetes(env, values):
+    k8s = env["kubernetes"]
+    command = ["kubectl", "--kubeconfig", k8s["kubeconfig"], "--context", k8s["context"],
+               "--namespace", k8s["namespace"], "apply", "-f", "-"]
+    namespace = {"apiVersion":"v1", "kind":"Namespace", "metadata":{
+        "name":k8s["namespace"], "labels":{"app.kubernetes.io/part-of":"inference-stack"}}}
+    secret = {"apiVersion":"v1", "kind":"Secret", "metadata":{"name":"inference-credentials",
+        "namespace":k8s["namespace"], "labels":{"app.kubernetes.io/part-of":"inference-stack"}},
+        "type":"Opaque", "stringData":values}
+    for document in [namespace, secret]:
+        subprocess.run(command, input=json.dumps(document), text=True, check=True, timeout=60)
+
+
+def initialize_config(args):
+    reject_mixed_args(args)
+    if args.source_env:
+        raise ValueError('--config reads secrets.file; do not also supply --source-env')
+    config = StackConfig(args.config)
+    env = config.environment
+    enforce_execution(env)
+    values = config.credentials()
+    private = ROOT / 'secrets' / config.name
+    private.mkdir(parents=True, exist_ok=True, mode=0o700)
+    original = {path.name: path.read_text().strip() for path in private.iterdir() if path.is_file()}
+    for key, value in values.items():
+        fd = os.open(private / key, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, 'w') as output:
+            output.write(value)
+    for key in original.keys() - values.keys():
+        if key.endswith('_API_KEY') or key == 'GATEWAY_TOKEN':
+            (private / key).unlink()
+    if values != original:
+        revision = ROOT / '.state' / config.name / 'credentials.version'
+        revision.parent.mkdir(parents=True, exist_ok=True)
+        revision.write_text(secrets.token_hex(16) + '\n')
+    if env['runtime'] == 'kubernetes':
+        apply_kubernetes(env, values)
+    print(f'Credentials initialized for {config.name}; values omitted')
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--environment", required=True)
-    parser.add_argument("--runtime", choices=["kubernetes", "docker"], required=True)
+    parser.add_argument("--config", type=Path)
+    parser.add_argument("--environment")
+    parser.add_argument("--runtime", choices=["kubernetes", "docker"])
     parser.add_argument("--source-env", type=Path)
-    initialize(parser.parse_args())
+    args = parser.parse_args()
+    if not args.config and (not args.environment or not args.runtime):
+        parser.error('provide --config, or both legacy --environment and --runtime')
+    try:
+        initialize(args)
+    except (ValueError, FileNotFoundError, subprocess.CalledProcessError) as error:
+        parser.exit(2, f'credentials: {error}\n')

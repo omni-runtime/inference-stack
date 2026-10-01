@@ -1,5 +1,10 @@
 # Docker Compose workflow
 
+New deployments use [`examples/docker/stack.yaml`](../examples/docker/stack.yaml)
+and the [unified configuration CLI](configuration.md). Offline check/render/plan
+do not require a Docker daemon. Credential initialization and lifecycle operations
+retain the tools-container boundary described below; legacy commands remain supported.
+
 The example `docker` profile runs operator commands inside a tools container at
 `/workspace/inference-stack`. Serving containers receive only project named
 volumes and an explicitly allowed read-only model directory; they do not receive

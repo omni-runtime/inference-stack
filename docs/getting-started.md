@@ -1,107 +1,83 @@
 # Getting started
 
-## 1. Prepare the source tools
+## Prepare the tools and choose one stack file
 
 Use Python 3.12+, Git and a target-specific client (`kubectl`, or Docker with
-Compose v2 and include/volume-subpath support). Install the locked dependencies:
+Compose include/volume-subpath support). Install the locked dependencies:
 
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements.lock
+python scripts/deploy.py render --config examples/cloud-only/stack.yaml --config-only
 ```
 
-Rendering Kubernetes configuration requires no cluster or credentials:
+This needs no cluster or credentials. The example explicitly uses mock backends.
+It is not a deployment or inference test. SR/Envoy remain the real components
+when you actually run the rendered deployment.
 
-```bash
-python scripts/deploy.py render --runtime kubernetes --environment kubernetes \
-  --example cloud-only --overlay mock --config-only
-```
+Create a private instance from a [unified example](configuration.md#create-an-instance).
+Use `examples/hybrid/stack.yaml` for external text plus macOS MLX video, or a pool
+example for managed NVIDIA engines. Configure hosts, reachable backend URLs,
+provider model IDs, actual capabilities, resource limits and kubeconfig in that
+one file. Select `mode: mock` for initial gateway acceptance. The CLI executes
+where invoked; a configured SSH identity does not cause an automatic remote login.
 
-`--config-only` skips release/credential readiness checks. It is not a deployment
-or an inference test. `--overlay mock` explicitly substitutes model backends;
-SR and Envoy remain the real components when the rendered deployment is run.
+## Supply a router artifact
 
-## 2. Supply the router artifact
-
-Build a native image using the companion project's
+Build an image using project B's
 [build guide](https://github.com/omni-runtime/semantic-router-multimodal/blob/main/docs/building.md).
-The checked-in contract's image references identify historical local OCI artifacts,
-not public registry packages. Obtain/build an image, import it into your cluster's
-container runtime or push it to a registry you control, and record its immutable
-reference, platform and provenance in a local copy of `contracts/release.yaml`.
-
-For a newly built artifact, set the local contract `status: candidate` and the
-image `acceptance: built-unit-tested` only after its build/tests pass. Use
-`--release contracts/release.local.yaml --candidate-test --overlay mock` for first
-acceptance. After the gateway suite succeeds, record its report and change the
-local contract to `status: preview`, `acceptance: tested-with-mock`. Use the same
-`--release` path for later deployments. Do not copy the historical acceptance
-label to an untested binary. `contracts/release.local.yaml` is ignored by Git.
-
-## 3. Configure an environment
-
-Edit or copy `environments/kubernetes/`. The directory name must match `name`.
-Use the actual kubeconfig, context, namespace, node, model root and reachable
-SSH-host field (used by test clients to determine the gateway address). The CLI
-runs where invoked; it does not automatically log into that host.
-
-Model catalogs specify provider model IDs, endpoint URLs, capabilities, context
-and output budgets. The default cloud URL/model are placeholders. Configure your
-own OpenAI-compatible endpoint and matching model ID. A model capability declaration
-must reflect the actual engine/model, not a desired feature.
-
-The managed engine example assumes NVIDIA support and pre-existing model weights.
-The sample resource profile does not authorize concurrent text and speech engines
-on one small GPU. Use `cloud-only` or explicit mock backends to start without GPU
-resources. The `hybrid` environment registers external text and MLX video services.
-
-## 4. Initialize private credentials
+The checked-in digest references identify historical local OCI artifacts, not
+public registry packages. Build/import an image into the target runtime or publish
+it to your own registry and produce the corresponding contract in project B.
 
 ```bash
-cp secrets/credentials.env.example /path/to/private/credentials.env
-# Edit that private file and restrict its permissions; never commit it.
-python scripts/credentials.py --runtime kubernetes --environment kubernetes \
-  --source-env /path/to/private/credentials.env
+python scripts/configure.py import-release \
+  --source ../semantic-router-multimodal/release.yaml \
+  --output locks/router.local.yaml
 ```
 
-The initializer writes private files under `secrets/<environment>/` and applies a
-namespace-scoped Secret. It generates missing gateway/model tokens and reads the
-cloud key from the explicit source. Values are not printed or put in subprocess
-arguments. Use `GATEWAY_TOKEN` for clients, not the backend API keys.
+Point `artifacts.release` in the instance at `../../locks/router.local.yaml`.
+Import preserves existing evidence claims; it does not verify the runtime or make
+an untested image accepted. A newly built artifact uses `status: candidate` and
+`acceptance: built-unit-tested` only after build tests pass. Its first gateway
+acceptance requires explicit `mode: mock` plus `--candidate-test`.
 
-## 5. Deploy and verify a candidate
+## Configure credentials, preview and deploy
 
-After setting up the local candidate contract and importing its image:
+Fill the instance's referenced `secrets.env`, using `GATEWAY_TOKEN` and the named
+backend keys. Never commit it. Initialize runtime credentials explicitly:
 
 ```bash
-python scripts/deploy.py deploy --runtime kubernetes --environment kubernetes \
-  --example vllm-omni-cloud --overlay mock \
-  --release contracts/release.local.yaml --candidate-test
-python tests/integration/run.py --runtime kubernetes --environment kubernetes \
-  --example vllm-omni-cloud --overlay mock
+python scripts/credentials.py --config instances/lab/stack.yaml
+python scripts/deploy.py check --config instances/lab/stack.yaml --candidate-test
+python scripts/deploy.py plan --config instances/lab/stack.yaml
+python scripts/deploy.py deploy --config instances/lab/stack.yaml --candidate-test
+python scripts/deploy.py test --config instances/lab/stack.yaml
 ```
 
-For MLX protocol fixtures, use `--environment hybrid --catalog environments/hybrid/catalog.yaml`
-on both commands. This needs an ARM64 router artifact for the sample hybrid profile.
-To use a different architecture, update the profile and corresponding artifact.
+Omit `--candidate-test` when the selected contract already carries appropriate
+acceptance. The initializer writes private mode-0600 files and, in Kubernetes,
+applies a namespace Secret. Offline checks do not establish cluster reachability.
+The hybrid example selects ARM64; use a contract/image matching the actual platform.
 
-Once mock acceptance is recorded and the local contract promoted, deploy the
-chosen example without `--overlay mock` and run `tests/integration/real.py` with
-matching environment/example/catalog arguments. Real tests invoke your configured
-models and may incur cloud API costs.
+After mock gateway acceptance, record the report and promote the local contract
+accordingly. Select `mode: real` in the same stack file for real backends, reinitialize
+credentials as needed, deploy without `--candidate-test`, and run explicit real tests.
+Those tests invoke configured models and may incur provider charges. H3 generation
+is a separate [explicit media test](configuration.md#credentials-and-lifecycle).
 
-## Operations
+## Operate the same instance
 
 ```bash
-python scripts/deploy.py status --runtime kubernetes --environment kubernetes
-python scripts/deploy.py logs --runtime kubernetes --environment kubernetes --service router
-python scripts/deploy.py stop --runtime kubernetes --environment kubernetes --service vllm
-python scripts/deploy.py start --runtime kubernetes --environment kubernetes --service vllm
-python scripts/deploy.py down --runtime kubernetes --environment kubernetes
+python scripts/deploy.py status --config instances/lab/stack.yaml
+python scripts/deploy.py logs --config instances/lab/stack.yaml --service router
+python scripts/deploy.py stop --config instances/lab/stack.yaml --service vllm
+python scripts/deploy.py start --config instances/lab/stack.yaml --service vllm
+python scripts/deploy.py down --config instances/lab/stack.yaml
 ```
 
-Stop intent is persisted; repeated deploys do not silently restart a deliberately
-stopped service. `down` removes project workloads but preserves persistent data.
-External services are managed on their own hosts. See [Docker](docker.md) for the
-tools-container workflow and [MLX](host-mlx.md) for native macOS lifecycle.
+Only managed services can be started/stopped this way. Stop intent is preserved;
+`down` removes project workloads while retaining persistent data. External models
+are operated separately on their hosts. See [Docker](docker.md), [MLX](host-mlx.md)
+and [configuration/migration](configuration.md) for details and legacy compatibility.

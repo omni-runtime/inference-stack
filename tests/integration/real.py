@@ -9,6 +9,8 @@ from run import ROOT, Run
 
 class RealRun(Run):
     def execute(self):
+        if self.args.overlay != 'real':
+            raise ValueError('real test runner requires mode: real')
         self.wait_gateway()
         chat = json.loads((ROOT / "tests/requests/chat-text.json").read_text())
         speech = json.loads((ROOT / "tests/requests/speech.json").read_text())
@@ -53,10 +55,14 @@ class RealRun(Run):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--environment", required=True)
-    parser.add_argument("--runtime", choices=["kubernetes", "docker"], required=True)
-    parser.add_argument("--example", required=True)
-    parser.add_argument("--catalog", default="config/models/catalog.yaml")
-    parser.add_argument("--overlay", choices=["real"], default="real")
+    parser.add_argument("--config", type=Path)
+    parser.add_argument("--environment")
+    parser.add_argument("--runtime", choices=["kubernetes", "docker"])
+    parser.add_argument("--example")
+    parser.add_argument("--catalog")
+    parser.add_argument("--overlay", choices=["real"])
     parser.add_argument("--url")
-    raise SystemExit(1 if RealRun(parser.parse_args()).execute() else 0)
+    args = parser.parse_args()
+    if not args.config:
+        args.overlay = args.overlay or 'real'
+    raise SystemExit(1 if RealRun(args).execute() else 0)

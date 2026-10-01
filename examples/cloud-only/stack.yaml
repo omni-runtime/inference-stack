@@ -1,0 +1,59 @@
+schema_version: 1
+name: sample-cloud-only
+mode: mock
+hosts:
+  gateway:
+    ssh: operator@gateway.example.test
+    root: /srv/inference-stack
+gateway:
+  runtime: kubernetes
+  platform: linux/amd64
+  project: inference-stack
+  host: gateway
+  kubernetes:
+    context: default
+    kubeconfig: /srv/inference-stack/environments/kubernetes/kubeconfig
+    namespace: inference-stack
+    node: gpu-node
+    gateway_node_port: 30800
+    runtime_class: nvidia
+    model_root: /srv/models
+resources:
+  router_memory: 1Gi
+  router_cpus: 2
+  envoy_memory: 512Mi
+  envoy_cpus: 2
+  mock_memory: 256Mi
+  mock_cpus: 1
+  model_memory: 8Gi
+  model_cpus: 4
+  gpu_count: 1
+  local_engines_concurrent: false
+  reason: Single 6 GiB GPU; simultaneous real-engine capacity unverified. Never stop
+    another model automatically.
+artifacts:
+  release: ../../contracts/release.yaml
+  versions: ../../versions.lock.yml
+secrets:
+  file: secrets.env
+backends:
+  cloud:
+    pool: cloud
+    provider: openai
+    base_url: https://api.example.com/v1
+    api_key_env: CLOUD_API_KEY
+    deployment:
+      mode: external
+models:
+- name: cloud/chat
+  provider_model_id: your-cloud-model
+  api_format: openai
+  capabilities:
+  - text
+  - image_input
+  context_window: 32768
+  max_output_tokens: 2048
+  backend: cloud
+routing:
+  enabled_models:
+  - cloud/chat
