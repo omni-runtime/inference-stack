@@ -115,3 +115,10 @@ python scripts/configure.py import-release \
 导入只校验并复制 B 的原始发布契约，不产生新的验收结论，不会发布镜像。
 新构建的 candidate 仍须在 mock 模式下用 `--candidate-test` 完成显式网关验收。
 旧参数入口目前保留，用于迁移兼容。
+
+Embedding models use `api_format: embeddings` and a model-level `embedding` declaration. See [embedding configuration and acceptance](embeddings.md).
+
+方舟多模态 embedding 使用 `api_format: ark_embeddings`、离散的
+`embedding.allowed_dimensions` 和独立密钥引用。本地 embedding 后端设置
+`mlx.engine: mlx-embeddings`；Python 路径、模型锁、输入/图片上限和内存限制
+仍写在同一份 `stack.yaml` 中，渲染生成宿主配置和 launchd 服务文件。

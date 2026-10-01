@@ -435,7 +435,7 @@ class Run:
                     failures.append("native generation continued after client disconnect")
                 if received and received[0].get("provider_model")!=record.get("provider_model"):
                     failures.append("frame model differs from selected handshake model")
-            for field in ["messages_sha256", "audio_parameters_sha256", "video_parameters_sha256", "form_sha256", "chat_output_sha256"]:
+            for field in ["messages_sha256", "audio_parameters_sha256", "video_parameters_sha256", "form_sha256", "chat_output_sha256", "embedding_parameters_sha256"]:
                 if received and record.get(field) and received[0].get(field) != record[field]:
                     failures.append(field + " changed between ingress and backend")
             if received and record.get("native_output") and record["status"] == 200 and not record.get("stream_mode"):

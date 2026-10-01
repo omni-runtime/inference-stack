@@ -129,6 +129,15 @@ class StackConfig:
         for model in doc['models']:
             if model['backend'] not in doc['backends']:
                 raise ValueError(f"models.{model['name']}.backend: unknown backend")
+        for model in doc['models']:
+            embedding = model.get('embedding')
+            if embedding and embedding.get('min_dimensions', embedding['dimensions']) > embedding['dimensions']:
+                raise ValueError(f"models.{model['name']}.embedding: min_dimensions exceeds dimensions")
+            if embedding and embedding.get('allowed_dimensions'):
+                allowed = embedding['allowed_dimensions']
+                low = embedding.get('min_dimensions', embedding['dimensions'])
+                if embedding['dimensions'] not in allowed or any(d < low or d > embedding['dimensions'] for d in allowed):
+                    raise ValueError(f"models.{model['name']}.embedding: allowed_dimensions must include the default and stay within the declared range")
         self.models = []
         for name in doc['routing']['enabled_models']:
             model = copy.deepcopy(next(m for m in doc['models'] if m['name'] == name))
@@ -236,11 +245,24 @@ class StackConfig:
         mlx = backend['mlx']
         root = Path(mlx['home'])
         manifest = json.loads(self.resolve(mlx['model_manifest']).read_text())
-        return dict(binary=str(root / 'bin/mlx-serve-macos-arm64/mlx-serve'),
+        settings = dict(binary=str(root / 'bin/mlx-serve-macos-arm64/mlx-serve'),
                     model=str(root / 'models' / mlx['model_directory']), revision=manifest['sha'],
                     secret_file=str(root / 'secrets' / backend['api_key_env']),
                     listen=mlx.get('listen', '127.0.0.1'), port=mlx.get('port',11234),
                     max_concurrent=mlx.get('max_concurrent',1), timeout=mlx.get('timeout',3600))
+        if mlx.get('engine') == 'mlx-embeddings':
+            settings.pop('binary')
+            models = [model for model in self.models if model['service'] == service]
+            if len(models) != 1 or models[0]['api_format'] != 'embeddings' or mlx.get('max_concurrent', 1) != 1:
+                raise ValueError('MLX embeddings requires exactly one embedding model and concurrency 1')
+            model = models[0]
+            embedding = model['embedding']
+            settings.update(engine='mlx-embeddings', model_id=model['provider_model_id'],
+                            dimensions=embedding['dimensions'], min_dimensions=embedding.get('min_dimensions', embedding['dimensions']),
+                            max_batch_size=embedding['max_batch_size'],
+                            max_input_tokens=mlx.get('max_input_tokens', model['context_window']),
+                            max_pixels=mlx.get('max_pixels', 262144), memory_limit_gib=mlx.get('memory_limit_gib', 8))
+        return settings
 
 
 def reject_mixed_args(args):

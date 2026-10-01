@@ -1,0 +1,12 @@
+{
+  "engine": "Blaizzy/mlx-embeddings",
+  "engine_revision": "9b28270be81211f2b8daed0041aec65ea5dc4b28",
+  "model": "Qwen/Qwen3-VL-Embedding-2B",
+  "revision": "9f2f7e710d6d81056aa5c0a4f04764fec6bb7bda",
+  "download_bytes": 4271068726,
+  "api_format": "embeddings",
+  "dimensions": 2048,
+  "minimum_dimensions": 64,
+  "runtime_license": "GPL-3.0",
+  "weight_license": "Apache-2.0"
+}

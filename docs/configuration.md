@@ -174,3 +174,11 @@ including acceptance labels; it does not create new acceptance evidence. A new
 candidate still requires explicit `mode: mock` and `--candidate-test`, followed
 by recorded gateway acceptance. The checked-in preview images remain historical
 local OCI artifacts, not published registry downloads.
+
+Embedding models use `api_format: embeddings` and a model-level `embedding` declaration. See [embedding configuration and acceptance](embeddings.md).
+
+Ark uses `api_format: ark_embeddings`, discrete `embedding.allowed_dimensions`,
+and a separate credential reference. The optional MLX embedding backend uses
+`mlx.engine: mlx-embeddings`; its Python executable, model lock, input/pixel limits
+and memory cap are declared in the same backend block. Rendering produces host
+settings and a launchd plist; only an explicit host installation restarts the engine.

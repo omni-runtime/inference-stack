@@ -9,3 +9,9 @@ Model weights, inference engines, container base images, and other dependencies
 are separately distributed and retain their own licenses. This repository does
 not distribute model weights. Project and product names identify compatibility;
 they do not imply endorsement by upstream maintainers.
+
+Optional MLX embedding host engine
+The standalone tools/host-embedding/serve.py is licensed under GPL-3.0-only
+(see tools/host-embedding/LICENSE) and imports the separately installed
+GPL-3.0 MLX Embeddings runtime. Other Project A components retain their
+existing Apache-2.0 license. Qwen model weights are separately downloaded.

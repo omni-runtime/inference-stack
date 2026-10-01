@@ -1,0 +1,93 @@
+schema_version: 1
+name: sample-ark-embeddings
+mode: mock
+hosts:
+  gateway:
+    ssh: operator@gateway.example.test
+    root: /srv/inference-stack
+gateway:
+  runtime: kubernetes
+  platform: linux/amd64
+  project: inference-stack
+  host: gateway
+  kubernetes:
+    context: default
+    kubeconfig: /srv/inference-stack/environments/kubernetes/kubeconfig
+    namespace: inference-stack
+    node: gpu-node
+    gateway_node_port: 30800
+    runtime_class: nvidia
+    model_root: /srv/models
+resources:
+  router_memory: 1Gi
+  router_cpus: 2
+  envoy_memory: 512Mi
+  envoy_cpus: 2
+  mock_memory: 256Mi
+  mock_cpus: 1
+  model_memory: 8Gi
+  model_cpus: 4
+  gpu_count: 1
+  local_engines_concurrent: false
+  reason: Single 6 GiB GPU; simultaneous real-engine capacity unverified. Never stop
+    another model automatically.
+artifacts:
+  release: ../../contracts/release.yaml
+  versions: ../../versions.lock.yml
+secrets:
+  file: secrets.env
+backends:
+  cloud:
+    pool: cloud
+    provider: volcengine-ark
+    base_url: https://ark.cn-beijing.volces.com/api/v3
+    api_key_env: ARK_EMBEDDING_API_KEY
+    deployment:
+      mode: external
+  local-embedding:
+    pool: omni
+    provider: openai
+    base_url: http://embedding-host.example.test:11235/v1
+    api_key_env: EMBEDDING_API_KEY
+    host: gateway
+    deployment:
+      mode: external
+models:
+- name: cloud/embedding
+  backend: cloud
+  provider_model_id: doubao-embedding-vision-251215
+  api_format: ark_embeddings
+  capabilities:
+  - text
+  - embedding
+  - image_input
+  context_window: 32768
+  max_output_tokens: 0
+  embedding:
+    space: doubao-embedding-vision-251215-v1
+    dimensions: 2048
+    min_dimensions: 1024
+    allowed_dimensions:
+    - 1024
+    - 2048
+    max_batch_size: 1
+- name: local/embedding
+  backend: local-embedding
+  provider_model_id: Qwen/Qwen3-VL-Embedding-2B
+  api_format: embeddings
+  capabilities:
+  - text
+  - embedding
+  - image_input
+  context_window: 4096
+  max_output_tokens: 0
+  embedding:
+    space: qwen3-vl-embedding-2b-bf16-v1
+    dimensions: 2048
+    min_dimensions: 64
+    max_batch_size: 1
+    image_token_estimate: 1024
+routing:
+  enabled_models:
+  - local/embedding
+  - cloud/embedding

@@ -8,6 +8,7 @@ from email import policy
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import io
 import json
+import math
 import os
 from pathlib import Path
 import struct
@@ -293,6 +294,8 @@ class Handler(BaseHTTPRequestHandler):
                   "path": self.path, "model": request.get("model"), "request_id": self.headers.get("X-Request-ID"),
                   "body_sha256": hashlib.sha256(body).hexdigest(), "body_bytes": len(body),
                   "fields": sorted(request), "stream": request.get("stream", False)}
+        if self.path in {"/v1/embeddings", "/api/v3/embeddings/multimodal", "/v1/embeddings/multimodal"}:
+            record["embedding_parameters_sha256"] = hashlib.sha256(json.dumps({k:v for k,v in request.items() if k != "model"}, sort_keys=True).encode()).hexdigest()
         if self.path == "/v1/images/generations":
             record["image_parameters_sha256"] = hashlib.sha256(json.dumps({k:v for k,v in request.items() if k != "model"}, sort_keys=True).encode()).hexdigest()
         if self.path == "/v1/audio/generate":
@@ -313,7 +316,29 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(401, {"error":{"message":"mock provider credential mismatch"}}); return
         if request.get("input") == "fixture:backend-error":
             self.reply(422, {"error": {"message": "fixture rejected voice", "code": "voice_unavailable"}}); return
-        if self.path in {"/v1/audio/transcriptions", "/v1/audio/translations"}:
+        if self.path in {"/v1/embeddings", "/api/v3/embeddings/multimodal", "/v1/embeddings/multimodal"}:
+            ark = self.path.endswith('/embeddings/multimodal')
+            inputs = request.get("input", [request.get("messages")])
+            if ark:
+                if inputs == [{"type":"text", "text":"fixture:backend-error"}]:
+                    self.reply(429, {"error":{"message":"fixture rate limit","code":"RateLimit"}}); return
+                inputs = [inputs]
+            if isinstance(inputs, str) or inputs and isinstance(inputs[0], int):
+                inputs = [inputs]
+            dimensions = request.get("dimensions", 64)
+            data = []
+            for index, item in enumerate(inputs):
+                digest = hashlib.sha256(json.dumps(item, sort_keys=True).encode()).digest()
+                vector = [(digest[i % len(digest)] - 127.5) / 127.5 for i in range(dimensions)]
+                norm = math.sqrt(sum(value*value for value in vector))
+                vector = [value / norm for value in vector]
+                if request.get("encoding_format") == "base64":
+                    vector = base64.b64encode(struct.pack("<"+"f"*dimensions, *vector)).decode()
+                data.append({"object":"embedding", "index":index, "embedding":vector})
+            if ark:
+                data = dict(data[0]); data.pop('index')
+            self.reply(200, {"object":"list", "data":data, "model":request["model"], "usage":{"prompt_tokens":len(inputs)*2,"total_tokens":len(inputs)*2,"prompt_tokens_details":{"text_tokens":1,"image_tokens":1}}}, extra={"X-VSR-Embedding-Space":"forged-upstream-space"})
+        elif self.path in {"/v1/audio/transcriptions", "/v1/audio/translations"}:
             if request.get("prompt") == "fixture:backend-error":
                 self.reply(422, {"error":{"message":"fixture audio rejection","code":"fixture_asr_error"}})
             elif request.get("stream") == "true":

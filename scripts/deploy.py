@@ -414,7 +414,7 @@ class Stack:
                 mlx = backend['mlx']
                 host_root = Path(self.config.document['hosts'][backend['host']]['root'])
                 plist = {'Label': 'local.inference-stack.' + self.config.name + '.' + service,
-                         'ProgramArguments': [mlx.get('python','/usr/bin/python3'), str(host_root / 'tools/host-mlx/serve.py'),
+                         'ProgramArguments': [mlx.get('python','/usr/bin/python3'), str(host_root / ('tools/host-embedding/serve.py' if mlx.get('engine') == 'mlx-embeddings' else 'tools/host-mlx/serve.py')),
                                               '--settings', str(Path(mlx['home']) / 'settings.json')],
                          'WorkingDirectory': mlx['home'], 'RunAtLoad': True, 'KeepAlive': True, 'ThrottleInterval': 30,
                          'StandardOutPath': str(Path(mlx['home']) / 'logs/server.log'),

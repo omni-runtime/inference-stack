@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add native cloud/local embedding request routing, vector-space isolation, batch/dimension limits, and text/token/multimodal protocol preservation.
+- Add Ark multimodal embedding adaptation and the pinned Qwen3-VL-Embedding-2B host engine, unified host settings, and validated preview.11 artifacts.
+- Validate 39 embedding gateway cases on each architecture, 17 real embedding/chat cases, eight existing chat/vision cases and three H3 cases; retain older full-media evidence separately.
+
 - Add one schema-validated `stack.yaml` input for deployment, credentials, tests
   and explicit MLX host tooling; keep legacy CLI compatibility and a migration command.
 - Separate shared backend settings from model capabilities and enable independent backend keys.

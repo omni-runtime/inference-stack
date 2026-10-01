@@ -11,6 +11,7 @@ recipe 和模型范围选择后端。Python 仅作为离线操作工具，不代
 
 ## 主要能力
 
+- [云端与本地 embedding 路由](docs/embeddings.md)：统一配置向量空间、维度和批量上限，需要包含 embedding 接口的新镜像。
 - K8s 与 Compose 共用模型目录和原生 SR 配置。
 - 七种显式的本地文本、本地多模态与云端组合。
 - `auto`、`local-only`、`cloud-only` 入口，认证、能力过滤和范围隔离。
@@ -37,7 +38,7 @@ python -m unittest discover -s tests/unit -v
 `instances/<name>/stack.yaml` 和 `secrets.env`，集中填写主机、模型、资源和凭据引用，
 并准备 kubeconfig 及配套 Router 镜像。
 
-**当前是 preview.10 源码预览版。** 发布契约中的镜像摘要标识已实测的本地 OCI 产物，
+**当前是 preview.11 源码预览版。** 发布契约中的镜像摘要标识已实测的本地 OCI 产物，
 尚未发布到公共镜像仓库，不能假定可以直接拉取。仓库不包含模型权重或真实凭证。
 
 ## 统一配置入口
@@ -65,5 +66,9 @@ Ref2VA 和并发压力未在这次验收范围内。详见[协议说明](docs/pr
 ## 参与和许可
 
 请阅读[贡献指南](CONTRIBUTING.md)、[社区规范](CODE_OF_CONDUCT.md)和
-[安全报告方式](SECURITY.md)。代码使用 [Apache-2.0](LICENSE)，上游归属见 [NOTICE](NOTICE)。
+[安全报告方式](SECURITY.md)。主项目使用 [Apache-2.0](LICENSE)，可选 [MLX embedding 宿主引擎使用 GPL-3.0](tools/host-embedding/README.md#license)，归属见 [NOTICE](NOTICE)。
 模型、引擎与基础镜像保留各自许可证。本项目是独立集成项目，不是 vLLM 官方发布。
+
+Embedding 已接入本地 Qwen3-VL-Embedding-2B 与云端方舟豆包：两种架构各
+39/39 项模拟后端验收、17/17 项真实 embedding/聊天、8/8 项原有聊天/视觉和
+3/3 项 H3 回归通过。详见 [preview.11 验证记录](validation/preview.11.json)。

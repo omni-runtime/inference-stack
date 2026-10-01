@@ -17,6 +17,7 @@ repository owns the router patch set, native builds and release contract.
 
 ## What it provides
 
+- [Cloud/local embedding routing](docs/embeddings.md), with explicit vector-space and dimension constraints (requires an embedding-capable artifact).
 - Shared router/model configuration for **Kubernetes and Docker Compose**.
 - Seven explicit combinations of local text, local multimodal and cloud pools.
 - `auto`, `local-only` and `cloud-only` entrypoints with authentication and hard capability constraints.
@@ -67,7 +68,7 @@ and build/load a router image.
 Follow the [deployment guide](docs/getting-started.md); the render command does
 not establish deployment readiness.
 
-> **Preview source release:** `0.1.0-preview.10`. The image digests in the contract
+> **Preview source release:** `0.1.0-preview.11`. The image digests in the contract
 > describe locally built acceptance artifacts. They have **not** been published
 > to a public image registry. Build/import an image using the companion project
 > before running a gateway. No model weights or credentials are included.
@@ -125,6 +126,10 @@ in [SECURITY.md](SECURITY.md).
 
 ## License and attribution
 
-[Apache-2.0](LICENSE). See [NOTICE](NOTICE) for upstream attribution.
+[Apache-2.0](LICENSE), except the optional [GPL-3.0 host embedding engine](tools/host-embedding/README.md#license). See [NOTICE](NOTICE) for upstream attribution.
 Model weights, inference engines and base images have their own licenses.
 This is an independent integration project and is not an official vLLM release.
+
+Embedding acceptance: **39/39 mock gateway cases on each architecture**, **17/17
+real embedding/chat cases**, **8/8 existing chat/vision cases**, and **3/3 H3
+cases**. See [preview.11 evidence and limits](validation/preview.11.json).

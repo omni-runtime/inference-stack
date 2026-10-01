@@ -1,6 +1,6 @@
 # Validation and release evidence
 
-The source publication carries **preview.10** implementation and a sanitized
+Historical **preview.10** acceptance is preserved in a sanitized
 [acceptance summary](../validation/preview.10.json). The summary retains case
 names, statuses, expected backend sets, timings and SHA256 of each original
 private report. Raw infrastructure logs and deployment identities are excluded.
@@ -33,3 +33,20 @@ baseline evidence. They were not rerun as a full matrix for preview.10. Public
 GitHub Actions checks source integrity, portable configuration and unit behavior;
 it does not create a Kubernetes cluster, start GPUs, or call a paid model API.
 Changing example hostnames does not constitute a new real-host acceptance run.
+
+## Embedding source candidate
+
+The current **preview.11** [acceptance report](../validation/preview.11.json)
+records 39 native SR/Envoy embedding cases on AMD64 and 39 on ARM64 (24 OpenAI
+embedding cases and 15 Ark adapter cases each). Native Go tests passed on AMD64
+and under ARM64/QEMU; ARM64 gateway tests then ran on the actual Apple Silicon
+host's Linux VM. Real acceptance through the updated ARM64 gateway passed 17
+embedding/chat cases, eight existing chat/vision cases and three H3 cases.
+
+The host uses the pinned original Qwen3-VL-Embedding-2B checkpoint. Its direct
+checks cover authentication, dimensions/base64, finite normalized vectors,
+text/image input, sequence isolation, text semantic ranking, bounded long input
+and rejection limits. A short H3 coexistence run completed with five successful
+embedding requests and no swap growth. These checks do not certify long video,
+unbounded input or arbitrary concurrency. The previous 48-case media HTTP matrix
+is historical preview.10 evidence and is not attributed to these new images.

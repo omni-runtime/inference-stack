@@ -6,25 +6,25 @@ patch_set:
   version: 0.1.0
   series: patches/series
   checksums:
-    0001-native-multimodal.patch: 3160d62a4e63d59079ab4b744314a991ef004addae15fe86b248bb59aacaddce
+    0001-native-multimodal.patch: 75c6573ad52af184c6a992f66b513caa6bfb919b08e2e9691514196b8b424334
 config:
   schema: v0.3
   extension: multimodal-v1
   require_entrypoint: true
 status: preview
-release_version: 0.1.0-preview.10
+release_version: 0.1.0-preview.11
 images:
-- reference: docker.io/inference-stack/semantic-router-multimodal@sha256:00fb9b9823377334c9976932dd13aa1d3e9da91ab6003ca66b917085729a1acf
-  tag: docker.io/inference-stack/semantic-router-multimodal:dev-3160d62a4e63
-  digest: sha256:00fb9b9823377334c9976932dd13aa1d3e9da91ab6003ca66b917085729a1acf
+- reference: docker.io/inference-stack/semantic-router-multimodal@sha256:218af0d676e83d6a149856ef38156a9b367d455c217ab367101da6d50d69b542
+  tag: docker.io/inference-stack/semantic-router-multimodal:dev-75c6573ad52a
+  digest: sha256:218af0d676e83d6a149856ef38156a9b367d455c217ab367101da6d50d69b542
   platform: linux/amd64
-  config_digest: sha256:0fd241f9cca9e4201b8203a40106f2a86c1de3ea9ed060770a05dc769a7f5055
+  config_digest: sha256:e7880d52ebe8979d010e8cde4a0181f1987729012c265524202cea293348c4e0
   base_digest: sha256:295a7da1ac432c950667083208a5a227e695efdc7b53502139d4c80c0b18b061
-  binary_digest: sha256:7a20b18d326e183c4f9cc79edb8fecd17cf2eb2d556041d28274ebaf4a3ee24d
-  patch_digest: 3160d62a4e63d59079ab4b744314a991ef004addae15fe86b248bb59aacaddce
+  binary_digest: sha256:3ab2e878354d949911819d936e5c619b96f76cc74d81462ac15c1c544419083a
+  patch_digest: 75c6573ad52af184c6a992f66b513caa6bfb919b08e2e9691514196b8b424334
   upstream_commit: 5aa0145eb16ddf7edcc40a87793f61260e8c5084
   build_method: native-cgo-build-plus-verified-oci-layer
-  acceptance: tested-with-real-backend
+  acceptance: tested-with-mock
   interfaces:
   - chat
   - speech
@@ -38,7 +38,9 @@ images:
   - realtime
   - speech_stream
   - mlx_video
-  request_capabilities: &id001
+  - embeddings
+  - ark_embeddings
+  request_capabilities:
   - text
   - image_input
   - audio_input
@@ -55,18 +57,19 @@ images:
   - video_generation
   - video_output
   - realtime
-  runtime_acceptance: 48 passed; real SR and Envoy with explicit mock backends; includes
-    14 MLX video cases
-  report: validation/preview.10.json
+  - embedding
+  - embedding_token_input
+  runtime_acceptance: 39 native embedding gateway cases passed on this architecture
+  report: validation/preview.11.json
   distribution: local-oci-artifact; not published to a public image registry
-- reference: docker.io/inference-stack/semantic-router-multimodal@sha256:303c77ab05e4f12d25ada3885b94f7d627f45abbea8d5a1ab116306c096f7398
-  tag: docker.io/inference-stack/semantic-router-multimodal:dev-3160d62a4e63-arm64
-  digest: sha256:303c77ab05e4f12d25ada3885b94f7d627f45abbea8d5a1ab116306c096f7398
+- reference: docker.io/inference-stack/semantic-router-multimodal@sha256:5245b06e8b683dd093172aa91e7442fc55769d011a2f892d463df409a7136899
+  tag: docker.io/inference-stack/semantic-router-multimodal:dev-75c6573ad52a-arm64
+  digest: sha256:5245b06e8b683dd093172aa91e7442fc55769d011a2f892d463df409a7136899
   platform: linux/arm64
-  config_digest: sha256:d546a2be298018c7d415e1dd7e586af21b9c1a2f7abf214bb54e2a566d419f14
+  config_digest: sha256:f7fa0f630e5ba67a33c1d44d5c15ce0451354b28bba86eb3ce07f6c435d08701
   base_digest: sha256:295a7da1ac432c950667083208a5a227e695efdc7b53502139d4c80c0b18b061
-  binary_digest: sha256:710e13e056dcd72f7501e3a8a0fb982601ec21fa715c33405b045919bcc9a031
-  patch_digest: 3160d62a4e63d59079ab4b744314a991ef004addae15fe86b248bb59aacaddce
+  binary_digest: sha256:c870b6744da563f839470c3ee4b435139b1583a55febb5c635617789c4512840
+  patch_digest: 75c6573ad52af184c6a992f66b513caa6bfb919b08e2e9691514196b8b424334
   upstream_commit: 5aa0145eb16ddf7edcc40a87793f61260e8c5084
   build_method: cross-cgo-qemu-tests-plus-verified-oci-layer
   acceptance: tested-with-real-backend
@@ -83,10 +86,30 @@ images:
   - realtime
   - speech_stream
   - mlx_video
-  request_capabilities: *id001
-  runtime_acceptance: 48 passed; real SR and Envoy with explicit mock backends; includes
-    14 MLX video cases
-  report: validation/preview.10.json
+  - embeddings
+  - ark_embeddings
+  request_capabilities:
+  - text
+  - image_input
+  - audio_input
+  - video_input
+  - tools
+  - structured_json
+  - speech_generation
+  - image_generation
+  - audio_generation
+  - transcription
+  - translation
+  - image_editing
+  - audio_output
+  - video_generation
+  - video_output
+  - realtime
+  - embedding
+  - embedding_token_input
+  runtime_acceptance: 39 native mock cases, plus real Qwen 2B/Ark embedding and existing
+    chat/H3 regression
+  report: validation/preview.11.json
   distribution: local-oci-artifact; not published to a public image registry
 components:
   envoy: 1.37.3
@@ -100,7 +123,7 @@ components:
 interfaces:
   chat:
     implementation: upstream-plus-existing-native-multimodal-patch
-    status: tested-with-mock
+    status: tested-with-real-backend
   mlx_video:
     implementation: native-typed-MLX-task-codec-and-dispatch
     status: tested-with-real-backend
@@ -110,25 +133,49 @@ interfaces:
     real_validation:
       engine: MLX-Serve 26.9.6
       model_revision: 9c9273578ed5c2daf0b9a42eace823a6a49050ba
-      report: validation/preview.10.json
-      scope: 256x256, 22 frames at 24 FPS, four turbo steps, PCM16 stereo; restart
-        verified
+      report: validation/preview.11.json
+      scope: 256x256, 22 frames, four turbo steps, RGB8 video and PCM16 stereo through
+        the updated gateway
+  embeddings:
+    implementation: native task, space qualification, OpenAI codec and passthrough
+    status: tested-with-real-backend
+    path: /v1/embeddings
+    wire: openai.embeddings.v1
+  ark_embeddings:
+    implementation: native Ark egress request codec and embedding response container
+      conversion
+    status: tested-with-real-backend
+    path: /api/v3/embeddings/multimodal
+    wire: ark.embeddings.v1
+    client_path: /v1/embeddings
+    limits: one joint text/image sample; float/base64; discrete model dimensions
 tests:
-  unit: llmprotocol-protocolcodec-selection-decision-catalog-config-configschema-dsl
-    and targeted extproc passed on AMD64 and ARM64/QEMU
-  kubernetes: 48 passed AMD64; 48 passed native ARM64; matching cases, statuses and
-    expected backend sets
-  historical_baseline: preview.9 seven-example 781-case matrices and real TTS/WebSocket
-    reports are historical; not rerun for preview.10
-  real: 8 passed AMD64 text/cloud; 8 passed ARM64 external-text/cloud; 3 H3 gateway
-    checks passed before and after MLX restart
+  unit: native AMD64 and ARM64/QEMU protocol, catalog, config, selection, DSL and
+    targeted extproc tests passed
+  kubernetes: 39 embedding and Ark gateway cases passed on native AMD64 and native
+    ARM64
+  real: Native ARM64 real Qwen3-VL-Embedding-2B and Ark multimodal embedding, existing
+    text/cloud and H3 regression passed; see per-suite evidence.
+  historical_baseline: preview.10 full-media mock and prior TTS/WebSocket suites were
+    not repeated for preview.11
 known_limits:
-  native_media_cross_wire: false
+  native_media_cross_wire: Ark embedding response-container translation only; other
+    media retains its exact wire
   mlx_video: MLX-Serve 26.9.6 native synchronous JSON or progress SSE; caller muxes
     RGB8/PCM16; no async video job API; no Ref2VA/host-local LoRA fields
   h3_deployment: macOS native Metal host, outside the Linux K8s VM
-  prior_features: Other interfaces remain implemented; preview.9 acceptance is historical,
-    not a preview.10 full-matrix claim
+  prior_features: The pre-embedding full-media mock matrix is preserved as historical
+    preview.10 evidence.
 reports:
+- validation/preview.11.json
 - validation/preview.10.json
 - docs/validation.md
+validation:
+  source: upstream plus exact SHA-256-verified patch set
+  unit: native AMD64 and ARM64/QEMU protocol, catalog, config, selection, DSL and
+    targeted extproc tests passed
+  kubernetes: 39 embedding and Ark gateway cases passed on native AMD64 and native
+    ARM64
+  real: Native ARM64 real Qwen3-VL-Embedding-2B and Ark multimodal embedding, existing
+    text/cloud and H3 regression passed; see per-suite evidence.
+validation_report: validation/preview.11.json

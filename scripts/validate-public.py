@@ -34,7 +34,7 @@ def main():
     assert compileall.compile_dir(ROOT / 'scripts', quiet=1)
     contract_path = ROOT / ('release.yaml' if (ROOT / 'release.yaml').exists() else 'contracts/release.yaml')
     contract = yaml.safe_load(contract_path.read_text())
-    evidence = json.loads((ROOT / 'validation/preview.10.json').read_text())
+    evidence = json.loads((ROOT / contract.get('validation_report', 'validation/preview.10.json')).read_text())
     assert contract['release_version'] == evidence['release']
     for suite in evidence['suites'].values():
         assert suite['failed'] == 0 and suite['passed'] == len(suite['cases'])
@@ -42,6 +42,9 @@ def main():
     for artifact in contract['images']:
         assert artifact['reference'].endswith('@' + artifact['digest'])
         assert (ROOT / artifact['report']).is_file()
+        if evidence.get('images'):
+            assert evidence['images'][artifact['platform']] == artifact['digest']
+            assert artifact['patch_digest'] == evidence['patch_digest']
     if (ROOT / 'patches').is_dir():
         checksums = json.loads((ROOT / 'patches/checksums.json').read_text())
         series = [x for x in (ROOT / 'patches/series').read_text().splitlines() if x and not x.startswith('#')]

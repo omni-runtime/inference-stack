@@ -1,0 +1,1329 @@
+{
+  "release": "0.1.0-preview.11",
+  "tested_at": "2026-10-02",
+  "patch_digest": "75c6573ad52af184c6a992f66b513caa6bfb919b08e2e9691514196b8b424334",
+  "images": {
+    "linux/amd64": "sha256:218af0d676e83d6a149856ef38156a9b367d455c217ab367101da6d50d69b542",
+    "linux/arm64": "sha256:5245b06e8b683dd093172aa91e7442fc55769d011a2f892d463df409a7136899"
+  },
+  "suites": {
+    "amd64-embeddings": {
+      "passed": 24,
+      "failed": 0,
+      "source_report_sha256": "f115012d7f8b70326b82895239df2b429c83a96b817fdb0244b8a166423b6e65",
+      "cases": [
+        {
+          "case": "embedding-local-only-float",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 14.89,
+          "error": null
+        },
+        {
+          "case": "embedding-local-only-base64",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 43.89,
+          "error": null
+        },
+        {
+          "case": "embedding-auto-local-only",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 4.89,
+          "error": null
+        },
+        {
+          "case": "embedding-cloud-only-float",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 5.96,
+          "error": null
+        },
+        {
+          "case": "embedding-cloud-only-base64",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 3.89,
+          "error": null
+        },
+        {
+          "case": "embedding-auto-cloud-only",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 4.93,
+          "error": null
+        },
+        {
+          "case": "embedding-batch",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 4.7,
+          "error": null
+        },
+        {
+          "case": "embedding-token-batch",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 5.15,
+          "error": null
+        },
+        {
+          "case": "embedding-forged-headers",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 3.16,
+          "error": null
+        },
+        {
+          "case": "embedding-unauthenticated",
+          "status": 401,
+          "expected_statuses": [
+            401
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.5,
+          "error": null
+        },
+        {
+          "case": "embedding-ambiguous",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.41,
+          "error": null
+        },
+        {
+          "case": "embedding-space-conflict",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.41,
+          "error": null
+        },
+        {
+          "case": "embedding-bad-dimensions",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.32,
+          "error": null
+        },
+        {
+          "case": "embedding-batch-limit",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.31,
+          "error": null
+        },
+        {
+          "case": "embedding-token-support",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.45,
+          "error": null
+        },
+        {
+          "case": "embedding-empty",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.03,
+          "error": null
+        },
+        {
+          "case": "embedding-mixed",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.09,
+          "error": null
+        },
+        {
+          "case": "embedding-stream",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.18,
+          "error": null
+        },
+        {
+          "case": "embedding-unknown",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.07,
+          "error": null
+        },
+        {
+          "case": "embedding-content-type",
+          "status": 415,
+          "expected_statuses": [
+            415
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 0.83,
+          "error": null
+        },
+        {
+          "case": "embedding-backend-error",
+          "status": 422,
+          "expected_statuses": [
+            422
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 43.26,
+          "error": null
+        },
+        {
+          "case": "embedding-image",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 4.27,
+          "error": null
+        },
+        {
+          "case": "embedding-cloud-image-rejected",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 2.0,
+          "error": null
+        },
+        {
+          "case": "embedding-chat-isolation",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.67,
+          "error": null
+        }
+      ]
+    },
+    "amd64-ark": {
+      "passed": 15,
+      "failed": 0,
+      "source_report_sha256": "14e813d6077c2f216487e37114b2353465faa2ddb6cf5d0cd9c971448e49499a",
+      "cases": [
+        {
+          "case": "ark-embedding-cloud-1024-float",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 6.31,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-cloud-1024-base64",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 3.58,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-cloud-2048-float",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 7.34,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-cloud-2048-base64",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 3.86,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-cloud-image",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 5.95,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-local-image",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 3.8,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-auto-cloud",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 5.11,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-ambiguous",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.71,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-dimension-gap",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.51,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-batch-rejected",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.44,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-tokens-rejected",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.39,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-instruction",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 5.25,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-user-rejected",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.83,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-backend-error",
+          "status": 429,
+          "expected_statuses": [
+            429
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 42.9,
+          "error": null
+        },
+        {
+          "case": "ark-chat-isolation",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 1.79,
+          "error": null
+        }
+      ]
+    },
+    "arm64-embeddings": {
+      "passed": 24,
+      "failed": 0,
+      "source_report_sha256": "52611a29fc07561f849494c0f1a2f3cb1267459c9c8d9c48a166569678cf8bfc",
+      "cases": [
+        {
+          "case": "embedding-local-only-float",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 12.63,
+          "error": null
+        },
+        {
+          "case": "embedding-local-only-base64",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 53.34,
+          "error": null
+        },
+        {
+          "case": "embedding-auto-local-only",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 9.08,
+          "error": null
+        },
+        {
+          "case": "embedding-cloud-only-float",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 9.27,
+          "error": null
+        },
+        {
+          "case": "embedding-cloud-only-base64",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 7.38,
+          "error": null
+        },
+        {
+          "case": "embedding-auto-cloud-only",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 6.96,
+          "error": null
+        },
+        {
+          "case": "embedding-batch",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 9.41,
+          "error": null
+        },
+        {
+          "case": "embedding-token-batch",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 9.13,
+          "error": null
+        },
+        {
+          "case": "embedding-forged-headers",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 6.67,
+          "error": null
+        },
+        {
+          "case": "embedding-unauthenticated",
+          "status": 401,
+          "expected_statuses": [
+            401
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 5.02,
+          "error": null
+        },
+        {
+          "case": "embedding-ambiguous",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 4.98,
+          "error": null
+        },
+        {
+          "case": "embedding-space-conflict",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 4.69,
+          "error": null
+        },
+        {
+          "case": "embedding-bad-dimensions",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 4.84,
+          "error": null
+        },
+        {
+          "case": "embedding-batch-limit",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 4.58,
+          "error": null
+        },
+        {
+          "case": "embedding-token-support",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 4.29,
+          "error": null
+        },
+        {
+          "case": "embedding-empty",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 4.48,
+          "error": null
+        },
+        {
+          "case": "embedding-mixed",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 4.04,
+          "error": null
+        },
+        {
+          "case": "embedding-stream",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 3.95,
+          "error": null
+        },
+        {
+          "case": "embedding-unknown",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 3.95,
+          "error": null
+        },
+        {
+          "case": "embedding-content-type",
+          "status": 415,
+          "expected_statuses": [
+            415
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 3.86,
+          "error": null
+        },
+        {
+          "case": "embedding-backend-error",
+          "status": 422,
+          "expected_statuses": [
+            422
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 5.11,
+          "error": null
+        },
+        {
+          "case": "embedding-image",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 5.66,
+          "error": null
+        },
+        {
+          "case": "embedding-cloud-image-rejected",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 4.32,
+          "error": null
+        },
+        {
+          "case": "embedding-chat-isolation",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 4.07,
+          "error": null
+        }
+      ]
+    },
+    "arm64-ark": {
+      "passed": 15,
+      "failed": 0,
+      "source_report_sha256": "82f9c69c988c12cfc474ef7ac513080021adfc5b821b24f1f77cf97546c8d3a7",
+      "cases": [
+        {
+          "case": "ark-embedding-cloud-1024-float",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 14.39,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-cloud-1024-base64",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 7.31,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-cloud-2048-float",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 11.71,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-cloud-2048-base64",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 7.02,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-cloud-image",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 8.05,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-local-image",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 6.36,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-auto-cloud",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 6.63,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-ambiguous",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 4.55,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-dimension-gap",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 3.82,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-batch-rejected",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 3.37,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-tokens-rejected",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 3.26,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-instruction",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 6.85,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-user-rejected",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 3.77,
+          "error": null
+        },
+        {
+          "case": "ark-embedding-backend-error",
+          "status": 429,
+          "expected_statuses": [
+            429
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 48.37,
+          "error": null
+        },
+        {
+          "case": "ark-chat-isolation",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 3.6,
+          "error": null
+        }
+      ]
+    },
+    "real-embedding": {
+      "passed": 17,
+      "failed": 0,
+      "source_report_sha256": "e940349c6fc3c1d16feb2e93dee348763e4e254f8ac28bc8f7b2d97e9ab7b75b",
+      "cases": [
+        {
+          "case": "real-embedding-local-only-text",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 84.58,
+          "error": null,
+          "embedding_dimensions": 2048,
+          "norm_squared": 1.000000109170242
+        },
+        {
+          "case": "real-embedding-local-only-base64",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 31.59,
+          "error": null,
+          "embedding_dimensions": 1024,
+          "norm_squared": 1.0000000351871023
+        },
+        {
+          "case": "real-embedding-local-only-mixed",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 461.13,
+          "error": null,
+          "embedding_dimensions": 1024,
+          "norm_squared": 0.9999999907972902
+        },
+        {
+          "case": "real-embedding-auto-local-only",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "local-embedding"
+          ],
+          "duration_ms": 32.5,
+          "error": null,
+          "embedding_dimensions": 1024,
+          "norm_squared": 1.0000000640866125
+        },
+        {
+          "case": "real-embedding-cloud-only-text",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "ark-embedding"
+          ],
+          "duration_ms": 233.2,
+          "error": null,
+          "embedding_dimensions": 2048,
+          "norm_squared": 1.0029435665650155
+        },
+        {
+          "case": "real-embedding-cloud-only-base64",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "ark-embedding"
+          ],
+          "duration_ms": 144.6,
+          "error": null,
+          "embedding_dimensions": 1024,
+          "norm_squared": 0.9999718160911613
+        },
+        {
+          "case": "real-embedding-cloud-only-mixed",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "ark-embedding"
+          ],
+          "duration_ms": 412.76,
+          "error": null,
+          "embedding_dimensions": 1024,
+          "norm_squared": 0.995601089503225
+        },
+        {
+          "case": "real-embedding-auto-cloud-only",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "ark-embedding"
+          ],
+          "duration_ms": 139.61,
+          "error": null,
+          "embedding_dimensions": 1024,
+          "norm_squared": 1.0020278016334174
+        },
+        {
+          "case": "real-embedding-cloud-instruction",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "ark-embedding"
+          ],
+          "duration_ms": 102.83,
+          "error": null,
+          "embedding_dimensions": 1024,
+          "norm_squared": 1.0008451708752233
+        },
+        {
+          "case": "real-embedding-ambiguous",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 6.0,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "real-embedding-dimension-gap",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 5.67,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "real-embedding-batch-limit",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 4.73,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "real-embedding-space-conflict",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 3.9,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "real-embedding-token-support",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 3.66,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "real-embedding-unauthorized",
+          "status": 401,
+          "expected_statuses": [
+            401
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 3.51,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "embedding-regression-local-only",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm"
+          ],
+          "duration_ms": 1883.81,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "embedding-regression-cloud-only",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 976.56,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        }
+      ]
+    },
+    "real-regression": {
+      "passed": 8,
+      "failed": 0,
+      "source_report_sha256": "3000e546e7c4ea3a498474d8f8f6a7f1373aaf9502fe74c8cd8cf7784ad0c6c6",
+      "cases": [
+        {
+          "case": "real-unauthenticated",
+          "status": 401,
+          "expected_statuses": [
+            401
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 5.02,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "real-chat-auto",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "duration_ms": 1196.91,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "real-chat-sse",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm",
+            "cloud"
+          ],
+          "duration_ms": 1112.73,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "real-local-only-forged-header",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "vllm"
+          ],
+          "duration_ms": 1119.6,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "real-cloud-only-forged-header",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 1541.88,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "real-explicit-model-rejected",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 6.55,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "real-vision",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "cloud"
+          ],
+          "duration_ms": 1574.72,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "real-speech",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 7.62,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        }
+      ]
+    },
+    "real-h3": {
+      "passed": 3,
+      "failed": 0,
+      "source_report_sha256": "31aabc58b8e23e8308d0f796c6a0e99f3afeb0cbfb9fb2391d5c481cc1f705a8",
+      "cases": [
+        {
+          "case": "h3-cloud-scope-rejected",
+          "status": 503,
+          "expected_statuses": [
+            503
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 5.42,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "h3-explicit-model-rejected",
+          "status": 400,
+          "expected_statuses": [
+            400
+          ],
+          "expected_backend_set": [],
+          "duration_ms": 4.7,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        },
+        {
+          "case": "h3-real-short-video",
+          "status": 200,
+          "expected_statuses": [
+            200
+          ],
+          "expected_backend_set": [
+            "mlx-h3"
+          ],
+          "duration_ms": 10153.78,
+          "error": null,
+          "embedding_dimensions": null,
+          "norm_squared": null
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "OCI images are local artifacts, not published registry downloads.",
+    "ARM64 compilation uses a cross compiler and QEMU tests; native ARM64 gateway acceptance is separate and passed.",
+    "The 48-case pre-embedding full media HTTP matrix is historical preview.10 evidence, not rerun here.",
+    "Host coexistence covers a short 256x256, 22-frame, 4-step H3 clip; unbounded concurrency and long video are not certified."
+  ],
+  "host_engine": {
+    "model": "Qwen/Qwen3-VL-Embedding-2B",
+    "revision": "9f2f7e710d6d81056aa5c0a4f04764fec6bb7bda",
+    "precision": "original BF16 weights; FP32 output normalization",
+    "weight_bytes": 4255140312,
+    "host_cases_passed": 16,
+    "mlx_short_input_probe": [
+      {
+        "dimensions": 2048,
+        "norm": 1.0008724927902222,
+        "seconds": 1.01,
+        "active_gib": 3.962863765656948,
+        "peak_gib": 3.9902272280305624,
+        "cache_gib": 0.027400977909564972
+      },
+      {
+        "dimensions": 2048,
+        "norm": 0.9979833364486694,
+        "seconds": 1.85,
+        "active_gib": 3.9713123980909586,
+        "peak_gib": 4.966414658352733,
+        "cache_gib": 1.4102235492318869
+      }
+    ],
+    "coexistence": {
+      "h3_exit_code": 0,
+      "embedding_requests_passed": 5,
+      "swap_growth_mib": 0.0,
+      "scope": "H3 256x256, 22 frames, four steps, with text embedding requests"
+    }
+  }
+}
