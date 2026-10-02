@@ -22,12 +22,14 @@ repository owns the router patch set, native builds and release contract.
 - Seven explicit combinations of local text, local multimodal and cloud pools.
 - `auto`, `local-only` and `cloud-only` entrypoints with authentication and hard capability constraints.
 - Managed vLLM/vLLM-Omni services or external backends on other machines.
+- [One K8s control plane with GPU workers](docs/kubernetes-cluster.md), mixed architectures, Service DNS and reusable node-local storage.
 - A hybrid example: Linux K8s gateway, NVIDIA text host and macOS Metal H3 host.
 - Explicit deploy/start/stop/status/logs/test/down operations and persistent stop intent.
 - Unit tests, mock gateway fixtures, real-backend probes and sanitized validation evidence.
 
-Python runs only as an operator CLI. It does not proxy inference, choose models,
-automatically free a GPU, or chain multiple model calls into a business workflow.
+The Python operator CLI manages deployment. Optional cloud ALP uses a separate
+private SR contract worker to validate protocol data. Neither component proxies
+inference, chooses models or executes agent actions.
 
 ## Architecture
 

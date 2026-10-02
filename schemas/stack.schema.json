@@ -406,6 +406,28 @@
                 "additionalProperties": {
                   "type": "object"
                 }
+              },
+              "node": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,62}$"
+              },
+              "existing_claims": {
+                "type": "object",
+                "properties": {
+                  "cache": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9.-]*$"
+                  },
+                  "outputs": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9.-]*$"
+                  }
+                },
+                "required": [
+                  "cache",
+                  "outputs"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
@@ -673,6 +695,216 @@
       },
       "required": [
         "enabled_models"
+      ],
+      "additionalProperties": false
+    },
+    "cluster": {
+      "type": "object",
+      "properties": {
+        "distribution": {
+          "const": "k3s"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+\\+k3s[0-9]+$"
+        },
+        "server": {
+          "type": "string",
+          "minLength": 1
+        },
+        "control_plane": {
+          "type": "object",
+          "properties": {
+            "host": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,62}$"
+            },
+            "node": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,62}$"
+            },
+            "address": {
+              "type": "string",
+              "minLength": 1
+            },
+            "platform": {
+              "enum": [
+                "linux/amd64",
+                "linux/arm64"
+              ]
+            },
+            "flannel_interface": {
+              "type": "string",
+              "minLength": 1
+            },
+            "runtime_class": {
+              "type": "string",
+              "minLength": 1
+            },
+            "model_root": {
+              "type": "string",
+              "minLength": 1
+            },
+            "gpu_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "data_dir": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kubelet_args": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "host",
+            "node",
+            "address",
+            "platform",
+            "flannel_interface"
+          ],
+          "additionalProperties": false
+        },
+        "workers": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "host": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,62}$"
+              },
+              "node": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{0,62}$"
+              },
+              "address": {
+                "type": "string",
+                "minLength": 1
+              },
+              "platform": {
+                "enum": [
+                  "linux/amd64",
+                  "linux/arm64"
+                ]
+              },
+              "flannel_interface": {
+                "type": "string",
+                "minLength": 1
+              },
+              "runtime_class": {
+                "type": "string",
+                "minLength": 1
+              },
+              "model_root": {
+                "type": "string",
+                "minLength": 1
+              },
+              "gpu_count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "data_dir": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kubelet_args": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "host",
+              "node",
+              "address",
+              "platform",
+              "flannel_interface"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "distribution",
+        "version",
+        "server",
+        "control_plane",
+        "workers"
+      ],
+      "additionalProperties": false
+    },
+    "alp": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "worker_directory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "worker_mount": {
+          "type": "string",
+          "minLength": 1
+        },
+        "python": {
+          "type": "string",
+          "minLength": 1
+        },
+        "catalog_file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task_key_env": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 60000
+        },
+        "models": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "enable_thinking": {
+                "type": "boolean"
+              },
+              "allow_stop_tool_call": {
+                "type": "boolean"
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "enabled",
+        "worker_directory",
+        "worker_mount",
+        "python",
+        "catalog_file",
+        "task_key_env",
+        "models"
       ],
       "additionalProperties": false
     }

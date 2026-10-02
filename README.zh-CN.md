@@ -7,7 +7,8 @@
 本仓库负责配置和运维；配套的
 [semantic-router-multimodal](https://github.com/omni-runtime/semantic-router-multimodal)
 负责原生 Semantic Router 补丁、构建与发布契约。Envoy 转发请求，SR 根据任务能力、
-recipe 和模型范围选择后端。Python 仅作为离线操作工具，不代理推理或创建业务工作流。
+recipe 和模型范围选择后端。Python CLI 管理部署；可选云端 ALP 由独立的私有契约
+worker 校验协议数据，两者均不代理推理、选择模型或执行业务动作。
 
 ## 主要能力
 
@@ -16,6 +17,7 @@ recipe 和模型范围选择后端。Python 仅作为离线操作工具，不代
 - 七种显式的本地文本、本地多模态与云端组合。
 - `auto`、`local-only`、`cloud-only` 入口，认证、能力过滤和范围隔离。
 - vLLM/vLLM-Omni 托管服务，以及其他主机上的外部服务。
+- [单控制平面＋GPU worker 集群](docs/kubernetes-cluster.md)：支持 ARM64 网关、AMD64 推理节点、集群内 Service DNS 和已有存储复用。
 - K8s 网关＋NVIDIA 文本主机＋macOS Metal H3 的混合示例。
 - 显式部署、启动、停止、状态、日志、测试与卸载；停止意图持久保存。
 

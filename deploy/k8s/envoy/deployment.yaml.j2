@@ -11,6 +11,9 @@ spec:
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
+{% if cluster %}
+      nodeSelector: {kubernetes.io/hostname: {{ cluster.control_plane.node }}, kubernetes.io/arch: {{ cluster.control_plane.platform.split('/')[1] }}}
+{% endif %}
       containers:
         - name: envoy
           image: {{ images.envoy }}

@@ -1,6 +1,7 @@
 """Load one explicit deployment document; never merge desired state from inventory."""
 import copy
 import hashlib
+import ipaddress
 import json
 from pathlib import Path
 import re
@@ -120,6 +121,7 @@ class StackConfig:
         self.images = read_document(self.versions_path)['images']
         self.release = read_document(self.release_path)
         self.secrets_path = self.resolve(doc['secrets']['file'])
+        self._validate_cluster()
         self._validate_backends()
         names = [model['name'] for model in doc['models']]
         if len(names) != len(set(names)):
@@ -146,6 +148,9 @@ class StackConfig:
             model.update({k: backend[k] for k in ('pool', 'provider', 'base_url', 'api_key_env')})
             model['service'] = service
             model['deployment'] = copy.deepcopy(backend['deployment'])
+            if 'node' in model['deployment']:
+                worker = doc['cluster']['workers'][model['deployment']['node']]
+                model['deployment']['placement'] = copy.deepcopy(worker)
             for filename, data in model['deployment'].pop('config_files', {}).items():
                 payload = yaml.safe_dump(data, sort_keys=False, allow_unicode=True).encode()
                 if filename in self.inline_files and self.inline_files[filename] != payload:
@@ -162,7 +167,7 @@ class StackConfig:
         if not self.mock and any(m['deployment']['mode'] == 'managed' for m in self.models):
             if 'model_memory' not in doc['resources']:
                 raise ValueError('resources.model_memory: required for managed engines')
-            if runtime == 'kubernetes':
+            if runtime == 'kubernetes' and not doc.get('cluster'):
                 for field in ('runtime_class', 'model_root'):
                     if field not in gateway['kubernetes']:
                         raise ValueError(f'gateway.kubernetes.{field}: required for managed engines')
@@ -171,6 +176,53 @@ class StackConfig:
         self.required_keys = {'GATEWAY_TOKEN'} | ({'MODEL_API_KEY'} if self.mock else {m['api_key_env'] for m in self.models})
         if self.mock:
             self.required_keys.update(m['api_key_env'] for m in self.models)
+        if doc.get('alp', {}).get('enabled'):
+            alp = doc['alp']
+            if runtime != 'kubernetes':
+                raise ValueError('alp: the private contract worker currently requires Kubernetes')
+            for field in ('worker_directory', 'worker_mount', 'python', 'catalog_file'):
+                if not Path(alp[field]).is_absolute():
+                    raise ValueError(f'alp.{field}: requires an absolute path')
+            if not Path(alp['catalog_file']).is_relative_to(alp['worker_mount']):
+                raise ValueError('alp.catalog_file: must be inside the private worker mount')
+            for name in alp['models']:
+                model = next((m for m in self.models if m['name'] == name), None)
+                if not model or model['api_format'] != 'openai' or 'tools' not in model['capabilities']:
+                    raise ValueError('alp.models: requires an enabled OpenAI Chat model with tools capability')
+            self.required_keys.add(alp['task_key_env'])
+
+    def _validate_cluster(self):
+        doc = self.document
+        cluster = doc.get('cluster')
+        if not cluster:
+            return
+        gateway = doc['gateway']
+        if gateway['runtime'] != 'kubernetes':
+            raise ValueError('cluster: requires a Kubernetes gateway')
+        check_url(cluster['server'], 'cluster.server')
+        if not cluster['server'].startswith('https://'):
+            raise ValueError('cluster.server: requires TLS')
+        master = cluster['control_plane']
+        if (master['host'], master['node'], master['platform']) != (
+                gateway['host'], gateway['kubernetes']['node'], gateway['platform']):
+            raise ValueError('cluster.control_plane: must match the gateway host, node and platform')
+        nodes = [master, *cluster['workers'].values()]
+        if len({n['node'] for n in nodes}) != len(nodes):
+            raise ValueError('cluster: duplicate Kubernetes node name')
+        if len({n['address'] for n in nodes}) != len(nodes):
+            raise ValueError('cluster: duplicate node address')
+        if 'control-plane' in cluster['workers']:
+            raise ValueError('cluster.workers: control-plane is a reserved name')
+        for node in nodes:
+            try:
+                ipaddress.ip_address(node['address'])
+            except ValueError:
+                raise ValueError('cluster.address: requires a node IP address') from None
+            if node['host'] not in doc['hosts']:
+                raise ValueError('cluster: unknown host')
+            for field in ('model_root', 'data_dir'):
+                if field in node and not Path(node[field]).is_absolute():
+                    raise ValueError(f'cluster.{field}: requires an absolute host path')
 
     def resolve(self, value):
         return (self.path.parent / value).resolve()
@@ -194,7 +246,28 @@ class StackConfig:
                 if set(deployment) != {'mode'}:
                     raise ValueError(f'{field}.deployment: external services cannot declare managed options')
             else:
-                if backend['pool'] == 'cloud' or (backend.get('host') and backend['host'] != gateway['host']):
+                node = deployment.get('node')
+                if deployment.get('existing_claims') and not doc.get('cluster'):
+                    raise ValueError(f'{field}.deployment.existing_claims: requires cluster placement')
+                if node:
+                    worker = doc.get('cluster', {}).get('workers', {}).get(node)
+                    if not worker:
+                        raise ValueError(f'{field}.deployment.node: unknown cluster worker')
+                    if backend.get('host', worker['host']) != worker['host']:
+                        raise ValueError(f'{field}.host: does not match the selected worker')
+                    if not self.mock and (not worker.get('runtime_class') or not worker.get('model_root') or worker.get('gpu_count', 0) < 1):
+                        raise ValueError(f'{field}: worker needs runtime_class, model_root and GPU capacity')
+                    if not self.mock and worker['platform'] != 'linux/amd64':
+                        raise ValueError(f'{field}: the locked NVIDIA engine images require linux/amd64')
+                    namespace = gateway['kubernetes']['namespace']
+                    address = urlsplit(backend['base_url'])
+                    names = {service, f'{service}.{namespace}', f'{service}.{namespace}.svc',
+                             f'{service}.{namespace}.svc.cluster.local'}
+                    if address.scheme != 'http' or address.hostname.rstrip('.') not in names or address.port != 8000:
+                        raise ValueError(f'{field}.base_url: managed cluster backends must use their own Service DNS on port 8000')
+                elif doc.get('cluster'):
+                    raise ValueError(f'{field}.deployment.node: select a worker for managed inference')
+                if backend['pool'] == 'cloud' or (not node and backend.get('host') and backend['host'] != gateway['host']):
                     raise ValueError(f'{field}: managed services must run on the gateway target')
                 if 'command' not in deployment or deployment.get('image') not in self.images:
                     raise ValueError(f'{field}.deployment: requires command and a locked image')

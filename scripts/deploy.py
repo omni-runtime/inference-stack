@@ -241,6 +241,8 @@ class Stack:
         if "@sha256:" not in selected["reference"]:
             raise ValueError("SR release must reference an immutable image digest")
         required = {"chat" if m["api_format"] == "openai" else m["api_format"] for m in self.models}
+        if self.config and self.config.document.get('alp', {}).get('enabled'):
+            required.add('alp_chat')
         available = set(selected.get("interfaces", []))
         if not required <= available or not self.release.get("config", {}).get("require_entrypoint"):
             raise ValueError(f"release lacks required interfaces/entrypoint enforcement: {sorted(required - available)}")
@@ -318,6 +320,8 @@ class Stack:
         replicas = {s: (0 if s in self.state["stopped"] else int(d.get("replicas", 1)))
                     for s,d in self.backends.items()}
         common = dict(models=self.models, scopes=scopes, environment=self.environment, images=self.images,
+                      cluster=self.config.document.get('cluster') if self.config else None,
+                      alp=self.config.document.get('alp') if self.config else None,
                       video_models=self.video_models,
                       media_store_replicas=0 if "media-bindings" in self.state["stopped"] else 1,
                       pools=self.pools, mock=self.mock, replicas=replicas,
@@ -382,10 +386,13 @@ class Stack:
                 (self.output / filename).write_text(self.renderer.get_template("deploy/k8s/media-bindings.yaml.j2").render(**common))
                 resources.append(filename)
             if self.backends:
+                claims = ([f'{kind}-{service}' for service, backend in self.backends.items()
+                           if not backend.get('existing_claims') for kind in ('model-cache','model-outputs')]
+                          if common['cluster'] else ['model-cache','model-outputs'])
                 write_yaml(self.output / "storage.yaml", {"apiVersion":"v1", "kind":"List", "items":[
                     {"apiVersion":"v1", "kind":"PersistentVolumeClaim", "metadata":{"name":name},
                      "spec":{"accessModes":["ReadWriteOnce"], "resources":{"requests":{"storage":"5Gi"}}}}
-                    for name in ["model-cache", "model-outputs"]]})
+                    for name in claims]})
                 resources.append("storage.yaml")
             mock_file = ROOT / "tests/overlays/mock/mock_backend.py"
             if mock_file.exists():

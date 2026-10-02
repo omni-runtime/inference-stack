@@ -12,17 +12,31 @@ spec:
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
+{% if cluster %}
+      nodeSelector: {kubernetes.io/hostname: {{ cluster.control_plane.node }}, kubernetes.io/arch: {{ cluster.control_plane.platform.split('/')[1] }}}
+{% endif %}
       containers:
         - name: router
           image: {{ images.router }}
           args: ["--config=/config/router.yaml", "--secure=false"]
           envFrom: [{secretRef: {name: inference-credentials}}]
+{% if alp and alp.enabled %}
+          env: [{name: PYTHONPATH, value: {{ alp.worker_mount | tojson }}}]
+{% endif %}
           resources:
             requests: {cpu: 100m, memory: 128Mi}
             limits: {cpu: '{{ environment.resources.get("router_cpus", 2) }}', memory: {{ environment.resources.router_memory }}}
           readinessProbe: {tcpSocket: {port: 50051}, periodSeconds: 5}
-          volumeMounts: [{name: config, mountPath: /config, readOnly: true}]
-      volumes: [{name: config, configMap: {name: router-config}}]
+          volumeMounts:
+            - {name: config, mountPath: /config, readOnly: true}
+{% if alp and alp.enabled %}
+            - {name: alp-worker, mountPath: {{ alp.worker_mount | tojson }}, readOnly: true}
+{% endif %}
+      volumes:
+        - {name: config, configMap: {name: router-config}}
+{% if alp and alp.enabled %}
+        - {name: alp-worker, hostPath: {path: {{ alp.worker_directory | tojson }}, type: Directory}}
+{% endif %}
 ---
 apiVersion: v1
 kind: Service

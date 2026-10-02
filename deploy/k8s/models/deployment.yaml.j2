@@ -1,4 +1,6 @@
 {% for service in backend_services %}
+{% set placement = backends[service].get('placement', environment.kubernetes) %}
+{% set claims = backends[service].get('existing_claims', {}) %}
 apiVersion: apps/v1
 kind: Deployment
 metadata: {name: {{ service }}}
@@ -14,8 +16,12 @@ spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
 {% if not mock %}
-      runtimeClassName: {{ environment.kubernetes.runtime_class }}
-      nodeSelector: {kubernetes.io/hostname: {{ environment.kubernetes.node }}}
+      runtimeClassName: {{ placement.runtime_class }}
+      nodeSelector:
+        kubernetes.io/hostname: {{ placement.node }}
+{% if cluster %}
+        kubernetes.io/arch: {{ placement.platform.split('/')[1] }}
+{% endif %}
 {% endif %}
       containers:
         - name: model
@@ -50,10 +56,10 @@ spec:
 {% endif %}
       volumes:
         - {name: config, configMap: {name: backend-config}}
-        - {name: cache, persistentVolumeClaim: {claimName: model-cache}}
-        - {name: outputs, persistentVolumeClaim: {claimName: model-outputs}}
+        - {name: cache, persistentVolumeClaim: {claimName: {{ claims.get('cache', 'model-cache' + ('-' + service if cluster else '')) }}}}
+        - {name: outputs, persistentVolumeClaim: {claimName: {{ claims.get('outputs', 'model-outputs' + ('-' + service if cluster else '')) }}}}
 {% if not mock %}
-        - {name: models, hostPath: {path: {{ environment.kubernetes.model_root }}, type: Directory}}
+        - {name: models, hostPath: {path: {{ placement.model_root }}, type: Directory}}
         - {name: shm, emptyDir: {medium: Memory, sizeLimit: 1Gi}}
 {% endif %}
 ---

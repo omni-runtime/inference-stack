@@ -63,8 +63,13 @@ class UnifiedConfiguration(unittest.TestCase):
 
     def rendered(self, stack):
         stack.render(stage=False)
-        return {p.name: list(yaml.safe_load_all(p.read_text())) for p in stack.output.glob('*.yaml')
-                if p.name != 'resolved.yaml'}
+        result = {p.name: list(yaml.safe_load_all(p.read_text())) for p in stack.output.glob('*.yaml')
+                  if p.name != 'resolved.yaml'}
+        # Legacy config files retain their original YAML bytes; inline unified
+        # configuration serializes the same mapping again. Their content hashes
+        # (and paths derived from those hashes) may differ without behavior drift.
+        # Compare the parsed configuration and all other deployment fields.
+        return json.loads(json.dumps(result).replace(stack.state['config_sha'], '<config-generation>'))
 
     def test_migration_preserves_all_seven_kubernetes_renderings(self):
         for example in sorted((ROOT / 'examples').glob('*/example.yaml')):
@@ -91,7 +96,9 @@ class UnifiedConfiguration(unittest.TestCase):
     def test_docker_migration_preserves_compose_and_routing(self):
         with patch.object(deploy,'enforce_execution'):
             legacy = deploy.Stack(arguments(environment='docker',runtime='docker',example='vllm-omni-cloud',overlay='mock'))
-        unified = deploy.Stack(arguments(config=ROOT/'examples/docker/stack.yaml'))
+        target = self.directory / 'docker-migrated' / 'stack.yaml'
+        configure.migrate('docker','vllm-omni-cloud','config/models/catalog.yaml',target,'mock')
+        unified = deploy.Stack(arguments(config=target))
         self.assertEqual(self.rendered(legacy),self.rendered(unified))
 
     def test_state_never_overrides_selected_mode_models_or_release(self):
