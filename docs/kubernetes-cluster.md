@@ -141,9 +141,12 @@ against the actual cloud backend. Changing projection requires new private
 provider sessions. Worker dependencies remain operator-installed and are not
 bundled in the router image.
 
-The worker imports separately authorized private `vllm-alp` and `alp_schema_mcp`
-dependencies; this public repository does not distribute them. See
-[SR native ALP](https://github.com/omni-runtime/semantic-router-multimodal/blob/main/docs/alp-native.md)
+The worker is `semantic_router_alp.cloud_worker`, installed from the public
+`semantic-router-alp` repository. It imports the separately authorized private
+`alp_schema_mcp[runtime]` dependency; it does not depend on `vllm-alp`. Use
+`contracts/release.semantic-router-alp-preview.1.yaml` for the composed ALP release.
+This repository does not distribute private dependency sources. See
+[SR native ALP](https://github.com/omni-runtime/semantic-router-alp/blob/main/docs/protocol.md)
 for dependency preparation, signed tasks, provider limitations and private replay.
 It validates protocol data without dispatching HTTP or executing agent actions.
 Keep one router replica or use sticky routing because replay is process-local.

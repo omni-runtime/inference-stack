@@ -127,6 +127,7 @@ class ClusterConfiguration(unittest.TestCase):
         self.assertEqual(integration['worker_env'], ['PYTHONPATH', 'ALP_TASK_KEY'])
         self.assertEqual(integration['timeout_milliseconds'], 10000)
         self.assertEqual(integration['command'][-2:], ['--projection', 'typed'])
+        self.assertEqual(integration['command'][2], 'semantic_router_alp.cloud_worker')
         spec = files['deployment-router.yaml'][0]['spec']['template']['spec']
         self.assertIn({'name': 'alp-worker', 'hostPath': {'path': '/srv/private-alp', 'type': 'Directory'}}, spec['volumes'])
         self.assertTrue(spec['containers'][0]['volumeMounts'][-1]['readOnly'])
