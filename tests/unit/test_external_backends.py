@@ -44,5 +44,19 @@ class ExternalBackends(unittest.TestCase):
         self.assertEqual(routes[2]["route"]["idle_timeout"],"3600s")
         b["request_timeout_seconds"]=0
         with self.assertRaises(ValueError):envoy.render([b])
+    def test_idle_connection_lifetime_does_not_change_active_request_budget(self):
+        a=self.model();b=self.model("cloud","chat");b["upstream_idle_timeout_seconds"]=60
+        result=envoy.render([a,b])["static_resources"]
+        self.assertNotIn("typed_extension_protocol_options",result["clusters"][1])
+        options=result["clusters"][2]["typed_extension_protocol_options"]["envoy.extensions.upstreams.http.v3.HttpProtocolOptions"]
+        self.assertEqual(options["common_http_protocol_options"]["idle_timeout"],"60s")
+        self.assertEqual(options["explicit_http_config"],{"http_protocol_options":{}})
+        hcm=result["listeners"][0]["filter_chains"][0]["filters"][0]["typed_config"]
+        route=hcm["route_config"]["virtual_hosts"][0]["routes"][2]["route"]
+        self.assertEqual(route["timeout"],"120s")
+        self.assertNotIn("retry_policy",route)
+        for value in [True,0,-1,3601,"60"]:
+            b["upstream_idle_timeout_seconds"]=value
+            with self.assertRaises(ValueError):envoy.render([b])
 
 if __name__=="__main__":unittest.main()

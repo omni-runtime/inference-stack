@@ -39,7 +39,18 @@ def render(models):
             raise ValueError("request_timeout_seconds must be an integer between 1 and 7200")
         address = urlsplit(model["base_url"])
         name = f"backend-{index}"
-        clusters.append(cluster(name, address.hostname, address.port or (443 if address.scheme == "https" else 80), tls=address.scheme == "https"))
+        upstream = cluster(name, address.hostname, address.port or (443 if address.scheme == "https" else 80), tls=address.scheme == "https")
+        idle = model.get("upstream_idle_timeout_seconds")
+        if idle is not None:
+            if type(idle) is not int or not 1 <= idle <= 3600:
+                raise ValueError("upstream_idle_timeout_seconds must be an integer between 1 and 3600")
+            upstream["typed_extension_protocol_options"] = {
+                "envoy.extensions.upstreams.http.v3.HttpProtocolOptions": {
+                    "@type": "type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions",
+                    "common_http_protocol_options": {"idle_timeout": f"{idle}s"},
+                    "explicit_http_config": {"http_protocol_options": {}},
+                }}
+        clusters.append(upstream)
         routes.append({"match": {"prefix": "/", "headers": [{
             "name": "x-selected-model", "string_match": {"exact": model["name"]}}]},
             "route": {"cluster": name, "timeout": f"{timeout}s", "idle_timeout": f"{timeout}s", "host_rewrite_literal": address.netloc}})

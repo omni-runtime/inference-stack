@@ -572,6 +572,12 @@
             "type": "integer",
             "minimum": 1
           },
+          "upstream_idle_timeout_seconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600,
+            "description": "Lifetime of an idle upstream HTTP connection; does not limit active requests or enable retries."
+          },
           "model_directory": {
             "type": "string",
             "minLength": 1

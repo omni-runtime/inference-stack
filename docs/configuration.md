@@ -1,5 +1,11 @@
 # Unified deployment configuration
 
+Each model may set `upstream_idle_timeout_seconds` (1–3600) to retire idle
+upstream HTTP connections before a provider, proxy or NAT silently expires them.
+For example, a cloud model can use `60`. Omission preserves Envoy's default.
+This applies only when no request is active; `request_timeout_seconds` remains
+the independent request budget. It does not enable automatic inference retries.
+
 Project A accepts one `stack.yaml` per deployment. Project B supplies the native
 router and its release contract; it does not maintain a second deployment
 configuration. The complete shape is checked against
