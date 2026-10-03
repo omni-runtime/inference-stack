@@ -128,6 +128,19 @@ produces the SR `global.integrations.alp` section and read-only worker mount.
 Select a release that implements `alp_chat`; merely enabling configuration on an
 older image is insufficient.
 
+`alp.projection: typed` passes the operation payload as an object in native
+Function Calling. The default `api_json` keeps the legacy once-encoded
+`payload_json` envelope and omits the new CLI flag for older workers. Typed mode
+requires a worker version with `--projection typed` support. It exposes the
+shared ALP and host task constraints in native tool parameters and retains full
+post-generation validation.
+
+`alp.request_strict: true` optionally adds `--request-strict`. Its default is
+false; this is a provider request, not an enforcement guarantee. Evaluate it
+against the actual cloud backend. Changing projection requires new private
+provider sessions. Worker dependencies remain operator-installed and are not
+bundled in the router image.
+
 The worker imports separately authorized private `vllm-alp` and `alp_schema_mcp`
 dependencies; this public repository does not distribute them. See
 [SR native ALP](https://github.com/omni-runtime/semantic-router-multimodal/blob/main/docs/alp-native.md)

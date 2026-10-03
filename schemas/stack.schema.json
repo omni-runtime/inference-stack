@@ -895,6 +895,20 @@
             "required": [],
             "additionalProperties": false
           }
+        },
+        "projection": {
+          "type": "string",
+          "enum": [
+            "api_json",
+            "typed"
+          ],
+          "default": "api_json",
+          "description": "Provider-native ALP wire projection; typed keeps payload as an object."
+        },
+        "request_strict": {
+          "type": "boolean",
+          "default": false,
+          "description": "Opt in to provider strict mode for typed schemas; unsupported providers may reject it."
         }
       },
       "required": [

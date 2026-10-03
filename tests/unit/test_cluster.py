@@ -120,15 +120,23 @@ class ClusterConfiguration(unittest.TestCase):
         cloud['capabilities'].append('tools')
         self.doc['alp'] = {'enabled': True, 'worker_directory': '/srv/private-alp', 'worker_mount': '/opt/alp',
                            'python': '/usr/bin/python3', 'catalog_file': '/opt/alp/catalogs.json',
-                           'task_key_env': 'ALP_TASK_KEY', 'models': {cloud['name']: {'enable_thinking': False}}}
+                           'task_key_env': 'ALP_TASK_KEY', 'projection': 'typed', 'models': {cloud['name']: {'enable_thinking': False}}}
         self.assertIn('ALP_TASK_KEY', self.config().required_keys)
         files = self.render()
         integration = files['router.yaml'][0]['global']['integrations']['alp']
         self.assertEqual(integration['worker_env'], ['PYTHONPATH', 'ALP_TASK_KEY'])
         self.assertEqual(integration['timeout_milliseconds'], 10000)
+        self.assertEqual(integration['command'][-2:], ['--projection', 'typed'])
         spec = files['deployment-router.yaml'][0]['spec']['template']['spec']
         self.assertIn({'name': 'alp-worker', 'hostPath': {'path': '/srv/private-alp', 'type': 'Directory'}}, spec['volumes'])
         self.assertTrue(spec['containers'][0]['volumeMounts'][-1]['readOnly'])
+        self.doc['alp']['request_strict'] = True
+        strict = self.render()['router.yaml'][0]['global']['integrations']['alp']
+        self.assertEqual(strict['command'][-1], '--request-strict')
+        self.doc['alp'].pop('request_strict')
+        self.doc['alp'].pop('projection')
+        legacy = self.render()['router.yaml'][0]['global']['integrations']['alp']
+        self.assertNotIn('--projection', legacy['command'])
 
     def test_migration_reuses_claims_without_overwriting_volume_binding(self):
         self.doc['backends']['vllm']['deployment']['existing_claims'] = {'cache': 'retained-cache', 'outputs': 'retained-outputs'}

@@ -70,7 +70,7 @@ global:
   integrations:
     alp:
       enabled: true
-      command: {{ [alp.python, '-m', 'vllm_alp.cloud_worker', '--config', alp.catalog_file] | tojson }}
+      command: {{ ([alp.python, '-m', 'vllm_alp.cloud_worker', '--config', alp.catalog_file] + (['--projection', 'typed'] if alp.get('projection') == 'typed' else []) + (['--request-strict'] if alp.get('request_strict', false) else [])) | tojson }}
       worker_env: {{ ['PYTHONPATH', alp.task_key_env] | tojson }}
       timeout_milliseconds: {{ alp.get('timeout_ms', 10000) }}
       models: {{ alp.models | tojson }}
